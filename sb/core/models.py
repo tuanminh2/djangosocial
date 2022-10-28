@@ -14,3 +14,6 @@ class Profile(models.Model):
     profile_image = models.ImageField(
         upload_to="profile_images", default="defaultimg.jpg")
     location = models.CharField(max_length=100,  blank=True)
+
+    def __str__(selt):
+        return selt.user.username
