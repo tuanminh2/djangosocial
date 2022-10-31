@@ -60,7 +60,8 @@
           <a
             href="#"
             class="bg-pink-500 flex font-bold hidden hover:bg-pink-600 hover:text-white inline-block items-center lg:block max-h-10 mr-4 px-4 py-2 rounded shado text-white"
-          >
+            style="display: flex;"
+            >
             <ion-icon
               name="add-circle"
               class="-mb-1 mr-1 opacity-90 text-xl uilus-circle"
@@ -390,16 +391,20 @@
                         var like_btn = document.getElementById("btn-like"); 
                         like_btn.classList.toggle("is-danger");
                       }
+                      function toggleClass2(){
+                        var like_btn = document.getElementById("btn-like2"); 
+                        like_btn.classList.toggle("is-danger");
+                      }
                     </script>
                   </div>
                 {% comment %} </a> {% endcomment %}
-                <a href="#" class="flex items-center space-x-2">
+                {% comment %} <a href="#" class="flex items-center space-x-2"> {% endcomment %}
                   <div class="p-2 rounded-full text-black">
                     <button class="button btn-cmt">
                       <i class="bi bi-chat"></i>
                     </button>
                   </div>
-                </a>
+                {% comment %} </a> {% endcomment %}
                 <a
                   href="#"
                   class="flex items-center space-x-2 flex-1 justify-end"
@@ -460,8 +465,12 @@
                   >
                     <p class="leading-6">
                       Y'all like billie eillish?
-                      <urna class="i uil-heart"></urna>
-                      <i class="uil-grin-tongue-wink"> </i>
+                      <button onclick="toggleClass2()" id="btn-like2" class="button">
+                        <i class="bi bi-heart"></i>
+                      </button>
+                      <button class="button comment-item_btn">
+                        <i class="bi bi-emoji-smile"></i>
+                      </button>
                     </p>
                     <div
                       class="absolute w-3 h-3 top-3 -left-1 bg-gray-100 transform rotate-45"
@@ -481,7 +490,9 @@
                   >
                     <p class="leading-6">
                       She's my favourite
-                      <i class="uil-grin-tongue-wink-alt"></i>
+                      <button class="button comment-item_btn">
+                        <i class="bi bi-emoji-smile"></i>
+                      </button>
                     </p>
                     <div
                       class="absolute w-3 h-3 top-3 -left-1 bg-gray-100 transform rotate-45"
@@ -1287,6 +1298,7 @@
                 <a
                   href="#"
                   class="border border-gray-200 font-semibold px-4 py-1 rounded-full hover:bg-pink-600 hover:text-white hover:border-pink-600"
+                 
                 >
                   Follow
                 </a>
