@@ -18,6 +18,21 @@ def index(request):
 @login_required
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
+    if(request.method == "POST"):
+        image = None
+        if request.FILES.get('image') == None:
+            image = user_profile.profileimage
+        else:
+            image = request.FILES.get('image')
+        bio = request.POST['bio']
+        location = request.POST['location']
+
+        user_profile.profileimage = image
+        user_profile.bio = bio
+        user_profile.location = location
+        user_profile.save()
+        return redirect('settings')
+
     return render(request, 'setting.html', {'user_profile': user_profile})
 
 

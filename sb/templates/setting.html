@@ -39,7 +39,7 @@
         <li><a href="#">Security</a></li> -->
       <!-- </ul> -->
       <br />
-      <form action="" method="POST">
+      <form action="" method="POST" enctype="multipart/form-data"">
         {% csrf_token %}
         <div class="grid lg:grid-cols-3 mt-12 gap-8">
           <div>
@@ -50,7 +50,7 @@
             <div class="grid grid-cols-2 gap-3 lg:p-6 p-4">
               <div class="col-span-2">
                 <label for=""> Profile Image</label>
-                <img src="{{user_profile.profileimage.url}}" alt="" />
+                <img width="100px" height="100px" src="{{user_profile.profileimage.url}}" alt="" />
                 <input type="file" name="image" />
               </div>
               <div class="col-span-2">
