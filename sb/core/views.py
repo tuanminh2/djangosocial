@@ -4,11 +4,18 @@ from django.http import HttpResponse
 # Create your views here.
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from .models import Profile
 
 
+@login_required
 def index(request):
     return render(request, "index.html")
+
+
+@login_required
+def settings(request):
+    return render(request, 'setting.html')
 
 
 def signup(request):
@@ -51,6 +58,11 @@ def signin(request):
             return redirect('/')
         else:
             messages.info(request, 'Authen failed')
-            return redirect('/signin')
+            return redirect('signin')
     else:
         return render(request, 'signin.html')
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect('signin')
