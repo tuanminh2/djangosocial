@@ -8,14 +8,17 @@ from django.contrib.auth.decorators import login_required
 from .models import Profile
 
 
-@login_required
 def index(request):
-    return render(request, "index.html")
+    if request.user.is_authenticated:
+        return render(request, "index.html")
+    else:
+        return redirect("/signin")
 
 
 @login_required
 def settings(request):
-    return render(request, 'setting.html')
+    user_profile = Profile.objects.get(user=request.user)
+    return render(request, 'setting.html', {'user_profile': user_profile})
 
 
 def signup(request):
