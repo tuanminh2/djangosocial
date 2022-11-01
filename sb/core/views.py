@@ -5,12 +5,14 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile
+from .models import Profile, Post
 
 
 def index(request):
     if request.user.is_authenticated:
-        return render(request, "index.html")
+        user_object = User.objects.get(username=request.user.username)
+        user_profile = Profile.objects.get(user=user_object)
+        return render(request, "index.html", {'user_profile': user_profile})
     else:
         return redirect("/signin")
 
@@ -84,3 +86,19 @@ def signin(request):
 def logout(request):
     auth.logout(request)
     return redirect('signin')
+
+
+@login_required(login_url='signin')
+def upload(request):
+    if request.method == 'POST':
+        userName = request.user.username
+        image = request.FILES.get('image_upload')
+        caption = request.POST['caption']
+
+        newPost = Post.objects.create(userName=userName,
+                                      image=image, caption=caption)
+        return redirect('/')
+    else:
+        return redirect('/')
+
+    return HttpResponse('<h1>upload get route</h1>')
