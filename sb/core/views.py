@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost
+from .models import Profile, Post, LikePost, FollowersCount
 
 
 def index(request):
@@ -130,9 +130,32 @@ def profile(request, pk):
     user_posts = Post.objects.filter(userName=pk)
     user_posts_length = len(user_posts)
     context = {
-        'user': user,
+        'user_object': user,
         'user_profile': user_profile,
         'user_posts': user_posts,
         'user_posts_length': user_posts_length,
     }
     return render(request, "profile.html", context)
+
+
+@login_required(login_url='signin')
+def follow(request):
+    if request.method == "POST":
+        follower = request.POST["follower"]
+        userName = request.POST["userName"]
+
+        oldFollower = FollowersCount.objects.filter(
+            follower=follower, userName=userName).first()
+
+        if(oldFollower):
+
+            delete_follower = oldFollower.delete()
+            return redirect("/profile/"+userName)
+        else:
+
+            new_follower = FollowersCount.objects.create(
+                follower=follower, userName=userName)
+            return redirect("/profile/"+userName)
+
+    else:
+        return redirect("/")
