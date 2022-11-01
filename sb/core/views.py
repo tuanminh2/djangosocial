@@ -5,14 +5,15 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post
+from .models import Profile, Post, LikePost
 
 
 def index(request):
     if request.user.is_authenticated:
         user_object = User.objects.get(username=request.user.username)
         user_profile = Profile.objects.get(user=user_object)
-        return render(request, "index.html", {'user_profile': user_profile})
+        posts = Post.objects.all()
+        return render(request, "index.html", {'user_profile': user_profile, 'posts': posts})
     else:
         return redirect("/signin")
 
@@ -101,4 +102,22 @@ def upload(request):
     else:
         return redirect('/')
 
-    return HttpResponse('<h1>upload get route</h1>')
+
+@login_required(login_url='signin')
+def like_post(request):
+    userName = request.user.username
+    # use get() for param
+    post_id = request.GET.get('post_id')
+    post = Post.objects.get(id=post_id)
+    like_filter = LikePost.objects.filter(
+        post_id=post_id, userName=userName).first()
+    if like_filter == None:
+        newLike = LikePost.objects.create(post_id=post_id, userName=userName)
+        post.no_of_likes = post.no_of_likes + 1
+        post.save()
+        return redirect('/')
+    else:
+        like_filter.delete()
+        post.no_of_likes = post.no_of_likes - 1
+        post.save()
+        return redirect('/')
