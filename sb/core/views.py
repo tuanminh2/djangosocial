@@ -22,17 +22,17 @@ def index(request):
         follower=request.user.username)
     for userNamei in userName_following_list:
         feed_listi = Post.objects.filter(userName=userNamei)
-        feed.append({
-            'userpost': feed_listi,
-            'user_image': feed_listi[0].auth.profile.profileimage.url
-        })
+        avatar_url = feed_listi[0].auth.profile.profileimage.url
+        for item in feed_listi:
+            dto = {'postContent': item, 'postAuthAvatar': avatar_url}
+            feed.append(dto)
     # each item in array to a parameter in chain method
-    feed_list = list(chain(*feed))
-    print("-----------------")
-    print(feed_list)
+    # feed_list = list(chain(*feed))
+
+    print(feed)
 
     # posts = Post.objects.all()
-    return render(request, "index.html", {'user_profile': user_profile, 'posts': feed_list})
+    return render(request, "index.html", {'user_profile': user_profile, 'data': feed})
 
 
 @login_required
@@ -189,3 +189,21 @@ def follow(request):
 
     else:
         return redirect("/")
+
+
+def search(request):
+    user_object = User.objects.get(username=request.user.username)
+
+    if request.method == "POST":
+        username = request.POST['nameOfUser']
+        username_object = User.objects.filter(username__icontains=username)
+        ids = []
+        profiles = []
+        for useri in username_object:
+            ids.append(useri.id)
+        for idi in ids:
+            profile = Profile.objects.filter(userId=idi).first()
+            profiles.append(profile)
+        return render(request, 'search.html', {'data': profiles})
+
+    return render(request, 'search.html')
