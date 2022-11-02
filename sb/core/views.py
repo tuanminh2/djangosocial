@@ -29,10 +29,21 @@ def index(request):
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
 
-    print(feed)
+    allUser = User.objects.all()
+    userFollowing = []
+    userFollowing.append(request.user)
+    for usernamei in userName_following_list:
+        userFollowing.append(User.objects.get(username=usernamei))
+    sugList = [x for x in list(allUser) if (x not in list(userFollowing))]
+
+    sugProfileList = []
+    for sugUser in sugList:
+        sugProfileList.append(sugUser.profile)
 
     # posts = Post.objects.all()
-    return render(request, "index.html", {'user_profile': user_profile, 'data': feed})
+    print("---------------------")
+    print(sugProfileList)
+    return render(request, "index.html", {'user_profile': user_profile, 'data': feed, 'sugProfieList': sugProfileList})
 
 
 @login_required
