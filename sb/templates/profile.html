@@ -35,11 +35,9 @@
             <span style="color: white; font-size: 27px"
               ><b>{{user_posts_length}} Post</b></span
             >
+            <span style="color: white; font-size: 27px"><b>{{followerCount}} followers</b></span>
             <span style="color: white; font-size: 27px"
-              ><b> followers</b></span
-            >
-            <span style="color: white; font-size: 27px"
-              ><b>3.5k following</b></span
+              ><b>{{followingCount}} following</b></span
             >
             <input type="hidden" value="{{user.username}}" name="follower" />
             <input
@@ -47,9 +45,13 @@
               value="{{user_object.username}}"
               name="userName"
             />
+            {% if user_object.username == user.username %}
+            <button><a href="/settings">Setting</a></button>
+            {% else %}
             <button style="background-color: #ffc0cb; border: #ffc0cb">
-              Follow
+              {{button_text}}
             </button>
+            {% endif %}
           </div>
         </form>
 

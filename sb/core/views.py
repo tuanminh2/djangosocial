@@ -125,15 +125,28 @@ def like_post(request):
 
 @login_required(login_url='signin')
 def profile(request, pk):
-    user = User.objects.get(username=pk)
-    user_profile = Profile.objects.get(user=user)
+    user_object = User.objects.get(username=pk)
+    user_profile = Profile.objects.get(user=user_object)
     user_posts = Post.objects.filter(userName=pk)
     user_posts_length = len(user_posts)
+
+    follower = request.user.username
+    if FollowersCount.objects.filter(follower=follower, userName=pk):
+        button_text = 'Unfollow'
+    else:
+        button_text = 'Follow'
+
+    followerCount = len(FollowersCount.objects.filter(userName=pk))
+    followingCount = len(FollowersCount.objects.filter(follower=pk))
     context = {
-        'user_object': user,
+        'user_object': user_object,
         'user_profile': user_profile,
         'user_posts': user_posts,
         'user_posts_length': user_posts_length,
+        'button_text': button_text,
+        'followerCount': followerCount,
+        'followingCount': followingCount,
+
     }
     return render(request, "profile.html", context)
 
