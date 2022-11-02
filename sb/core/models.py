@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     userId = models.IntegerField()
     bio = models.TextField(blank=True)
     profileimage = models.ImageField(
@@ -22,6 +22,7 @@ class Profile(models.Model):
 
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    auth = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
     userName = models.CharField(max_length=100)
     image = models.ImageField(upload_to='post_images')
     caption = models.TextField()

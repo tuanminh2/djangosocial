@@ -6,16 +6,33 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Profile, Post, LikePost, FollowersCount
+from itertools import chain
 
 
+@login_required(login_url='signin')
 def index(request):
-    if request.user.is_authenticated:
-        user_object = User.objects.get(username=request.user.username)
-        user_profile = Profile.objects.get(user=user_object)
-        posts = Post.objects.all()
-        return render(request, "index.html", {'user_profile': user_profile, 'posts': posts})
-    else:
-        return redirect("/signin")
+
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+
+    userName_following_list = []
+    feed = []
+
+    userName_following_list = FollowersCount.objects.filter(
+        follower=request.user.username)
+    for userNamei in userName_following_list:
+        feed_listi = Post.objects.filter(userName=userNamei)
+        feed.append({
+            'userpost': feed_listi,
+            'user_image': feed_listi[0].auth.profile.profileimage.url
+        })
+    # each item in array to a parameter in chain method
+    feed_list = list(chain(*feed))
+    print("-----------------")
+    print(feed_list)
+
+    # posts = Post.objects.all()
+    return render(request, "index.html", {'user_profile': user_profile, 'posts': feed_list})
 
 
 @login_required
@@ -50,7 +67,7 @@ def signup(request):
         if password == password2:
             if User.objects.filter(email=email).exists():
                 messages.info(request, 'Email taken')
-                return redirect('signup')
+                return redirect('/signup')
             else:
                 user = User.objects.create_user(
                     username=username, email=email, password=password)
@@ -58,7 +75,7 @@ def signup(request):
                 new_profile = Profile.objects.create(
                     user=user, userId=user.id)
                 new_profile.save()
-                return redirect("/")
+                return redirect("/signin")
         else:
             messages.info(request, "Password not matching")
             return redirect('signup')
@@ -97,7 +114,7 @@ def upload(request):
         caption = request.POST['caption']
 
         newPost = Post.objects.create(userName=userName,
-                                      image=image, caption=caption)
+                                      image=image, caption=caption, auth=request.user)
         return redirect('/')
     else:
         return redirect('/')
