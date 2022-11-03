@@ -5,17 +5,45 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost
+from .models import Profile, Post, LikePost, FollowersCount
+from itertools import chain
 
 
+@login_required(login_url='signin')
 def index(request):
-    if request.user.is_authenticated:
-        user_object = User.objects.get(username=request.user.username)
-        user_profile = Profile.objects.get(user=user_object)
-        posts = Post.objects.all()
-        return render(request, "index.html", {'user_profile': user_profile, 'posts': posts})
-    else:
-        return redirect("/signin")
+
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+
+    userName_following_list = []
+    feed = []
+
+    userName_following_list = FollowersCount.objects.filter(
+        follower=request.user.username)
+    for userNamei in userName_following_list:
+        feed_listi = Post.objects.filter(userName=userNamei)
+        avatar_url = feed_listi[0].auth.profile.profileimage.url
+        for item in feed_listi:
+            dto = {'postContent': item, 'postAuthAvatar': avatar_url}
+            feed.append(dto)
+    # each item in array to a parameter in chain method
+    # feed_list = list(chain(*feed))
+
+    allUser = User.objects.all()
+    userFollowing = []
+    userFollowing.append(request.user)
+    for usernamei in userName_following_list:
+        userFollowing.append(User.objects.get(username=usernamei))
+    sugList = [x for x in list(allUser) if (x not in list(userFollowing))]
+
+    sugProfileList = []
+    for sugUser in sugList:
+        sugProfileList.append(sugUser.profile)
+
+    # posts = Post.objects.all()
+    print("---------------------")
+    print(sugProfileList)
+    return render(request, "index.html", {'user_profile': user_profile, 'data': feed, 'sugProfieList': sugProfileList})
 
 
 @login_required
@@ -50,7 +78,7 @@ def signup(request):
         if password == password2:
             if User.objects.filter(email=email).exists():
                 messages.info(request, 'Email taken')
-                return redirect('signup')
+                return redirect('/signup')
             else:
                 user = User.objects.create_user(
                     username=username, email=email, password=password)
@@ -58,7 +86,7 @@ def signup(request):
                 new_profile = Profile.objects.create(
                     user=user, userId=user.id)
                 new_profile.save()
-                return redirect("/")
+                return redirect("/signin")
         else:
             messages.info(request, "Password not matching")
             return redirect('signup')
@@ -97,7 +125,7 @@ def upload(request):
         caption = request.POST['caption']
 
         newPost = Post.objects.create(userName=userName,
-                                      image=image, caption=caption)
+                                      image=image, caption=caption, auth=request.user)
         return redirect('/')
     else:
         return redirect('/')
@@ -121,3 +149,72 @@ def like_post(request):
         post.no_of_likes = post.no_of_likes - 1
         post.save()
         return redirect('/')
+
+
+@login_required(login_url='signin')
+def profile(request, pk):
+    user_object = User.objects.get(username=pk)
+    user_profile = Profile.objects.get(user=user_object)
+    user_posts = Post.objects.filter(userName=pk)
+    user_posts_length = len(user_posts)
+
+    follower = request.user.username
+    if FollowersCount.objects.filter(follower=follower, userName=pk):
+        button_text = 'Unfollow'
+    else:
+        button_text = 'Follow'
+
+    followerCount = len(FollowersCount.objects.filter(userName=pk))
+    followingCount = len(FollowersCount.objects.filter(follower=pk))
+    context = {
+        'user_object': user_object,
+        'user_profile': user_profile,
+        'user_posts': user_posts,
+        'user_posts_length': user_posts_length,
+        'button_text': button_text,
+        'followerCount': followerCount,
+        'followingCount': followingCount,
+
+    }
+    return render(request, "profile.html", context)
+
+
+@login_required(login_url='signin')
+def follow(request):
+    if request.method == "POST":
+        follower = request.POST["follower"]
+        userName = request.POST["userName"]
+
+        oldFollower = FollowersCount.objects.filter(
+            follower=follower, userName=userName).first()
+
+        if(oldFollower):
+
+            delete_follower = oldFollower.delete()
+            return redirect("/profile/"+userName)
+        else:
+
+            new_follower = FollowersCount.objects.create(
+                follower=follower, userName=userName)
+            return redirect("/profile/"+userName)
+
+    else:
+        return redirect("/")
+
+
+def search(request):
+    user_object = User.objects.get(username=request.user.username)
+
+    if request.method == "POST":
+        username = request.POST['nameOfUser']
+        username_object = User.objects.filter(username__icontains=username)
+        ids = []
+        profiles = []
+        for useri in username_object:
+            ids.append(useri.id)
+        for idi in ids:
+            profile = Profile.objects.filter(userId=idi).first()
+            profiles.append(profile)
+        return render(request, 'search.html', {'data': profiles})
+
+    return render(request, 'search.html')
