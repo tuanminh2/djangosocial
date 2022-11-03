@@ -5,20 +5,38 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile
-
+from .models import Profile, Post, LikePost
 
 
 def index(request):
-        if request.user.is_authenticated:
-            return render(request, "index.html")
-        else:
-            return redirect("/signin")
+    if request.user.is_authenticated:
+        user_object = User.objects.get(username=request.user.username)
+        user_profile = Profile.objects.get(user=user_object)
+        posts = Post.objects.all()
+        return render(request, "index.html", {'user_profile': user_profile, 'posts': posts})
+    else:
+        return redirect("/signin")
 
 
 @login_required
 def settings(request):
-    return render(request, 'setting.html')
+    user_profile = Profile.objects.get(user=request.user)
+    if(request.method == "POST"):
+        image = None
+        if request.FILES.get('image') == None:
+            image = user_profile.profileimage
+        else:
+            image = request.FILES.get('image')
+        bio = request.POST['bio']
+        location = request.POST['location']
+
+        user_profile.profileimage = image
+        user_profile.bio = bio
+        user_profile.location = location
+        user_profile.save()
+        return redirect('settings')
+
+    return render(request, 'setting.html', {'user_profile': user_profile})
 
 
 def signup(request):
@@ -69,3 +87,37 @@ def signin(request):
 def logout(request):
     auth.logout(request)
     return redirect('signin')
+
+
+@login_required(login_url='signin')
+def upload(request):
+    if request.method == 'POST':
+        userName = request.user.username
+        image = request.FILES.get('image_upload')
+        caption = request.POST['caption']
+
+        newPost = Post.objects.create(userName=userName,
+                                      image=image, caption=caption)
+        return redirect('/')
+    else:
+        return redirect('/')
+
+
+@login_required(login_url='signin')
+def like_post(request):
+    userName = request.user.username
+    # use get() for param
+    post_id = request.GET.get('post_id')
+    post = Post.objects.get(id=post_id)
+    like_filter = LikePost.objects.filter(
+        post_id=post_id, userName=userName).first()
+    if like_filter == None:
+        newLike = LikePost.objects.create(post_id=post_id, userName=userName)
+        post.no_of_likes = post.no_of_likes + 1
+        post.save()
+        return redirect('/')
+    else:
+        like_filter.delete()
+        post.no_of_likes = post.no_of_likes - 1
+        post.save()
+        return redirect('/')
