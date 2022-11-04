@@ -5,9 +5,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma-rtl.min.css">
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css"
+  />
     <title>Document</title>
-
-    <style>
+<style>
       :root {
         font-size: 10px;
       }
@@ -29,7 +34,30 @@
       img {
         display: block;
       }
-
+      .box-head {
+        display: flex;
+        align-items: center;
+      }
+      .box_name {
+        font-size: 13px;
+        padding-left: 8px;
+      }
+      .box-reaction,.comment-content_text {
+        margin: 10px;
+      }
+      p.like {
+        padding: 0px;
+        margin-bottom: 0px;
+      }
+      .comment-item{
+        display:flex;
+      }
+      .comment-item_btn,.comment-item_text{
+        border:none;
+      }
+      .comment-item_btn:focus,.comment-item_text:focus{
+        box-shadow:none;
+      }
       .container {
         max-width: 93.5rem;
         margin: 0 auto;
@@ -193,7 +221,19 @@
         font-size: 2.5rem;
         text-shadow: 0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.1);
       }
-
+      .modal-content-right{
+       
+        background-color: white;
+      }
+      .cr-top{
+        height:7%
+      }
+      .cr-mid{
+        height:60%
+      }
+      .cr-bot{
+        height:25%
+      }
       .fa-clone,
       .fa-comment {
         transform: rotateY(180deg);
@@ -367,7 +407,7 @@
           }
         }
       }
-    </style>
+  </style>
   </head>
   <body>
     <header>
@@ -385,7 +425,7 @@
           <div class="profile-user-settings">
             <h1 class="profile-user-name">{{user_profile.user.username}}</h1>
 
-            <a href="/settings"  class="btn profile-edit-btn">Edit Profile</a>
+            <a href="/settings" class="btn profile-edit-btn">Edit Profile</a>
 
             <button
               class="btn profile-settings-btn"
@@ -413,12 +453,11 @@
       </div>
       <!-- End of container -->
     </header>
-
     <main>
       <div class="container">
         <div class="gallery">
           {% for post in user_posts %}
-          <div class="gallery-item" tabindex="0">
+          <div class="gallery-item" tabindex="0" onclick="showhinh()" >
             <img
               src="{{post.image.url}}"
               class="gallery-image"
@@ -438,9 +477,101 @@
               </ul>
             </div>
           </div>
+          <div class="modal" style="display:none" id="modal" style="display: flex;">
+            <div class="modal-background"></div>
+            <div class="modal-content" style="width:1144px;justify-content: center;align-items: center;">
+              <div style="display:flex">
+                
+                <div class="modal-content-left" style="width:70%">
+                  <p class="image is-4by3">
+                    <img src="{{post.image.url}}" alt="">
+                  </p>
+                </div>
+                <div class="modal-content-right"style="height: 505px;">
+                  <div class="cr-top">
+                    <div class="image is-32x32">
+                      <div class="box-head">
+                        <img
+                          class="box-head_img is-rounded"
+                          src="{{user_profile.profileimage.url}}"
+                        />
+                        <p class="box_name">{{user_profile.user.username}}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="cr-mid">
+                    <div class="box-img" style="height: 363px; width: 470px">
+                      <p class="comment-content_text">Người bình luận : Text 123456</p>
+                      
+                    </div>
+                  </div>
+                  <div class="cr-bot">
+                    <div class="box-reaction">
+                      <button class="button is-danger" style="height: 30px; width: 30px">
+                        <i class="bi bi-heart"></i>
+                      </button>
+                      <button class="button" style="height: 30px; width: 30px">
+                        <i class="bi bi-heart"></i>
+                      </button>
+                      <button class="button btn-cmt" style="height: 30px; width: 30px">
+                        <i class="bi bi-chat"></i>
+                      </button>
+                    <p class="like" style="margin: 0;">2 Like</p>
+                    <i>{{profile.user.username|upper}}</i> {{ dweet.body }}
+                  <span class="is-small has-text-grey-light">
+                   Ngay dang bai viet
+                  </div>
+                  <div class="comment-content" id="comment">
+                   
+                    <div class="comment-item">
+                      <button class="button comment-item_btn">
+                        <i class="bi bi-emoji-smile"></i>
+                      </button>
+                      <input class="input is-small comment-item_text" type="text" placeholder="Add a comment">
+                    </div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+              
 
+              
+            </div>
+            <button class="modal-close is-large" aria-label="close" onclick="closehinh()"></button>
+          </div>
+          <script>
+            function showhinh(){
+              var showmodal = document.getElementById("modal")
+              showmodal.style.display="flex"
+            }
+            function closehinh(){
+              var closemodal = document.getElementById("modal")
+              closemodal.style.display="none"
+            }
+          </script>
           {% endfor %}
-       
+
+          {% comment %} script lo? {% endcomment %}
+          {% comment %} <script>
+            const posts = document.querySelectorAll('.gallery-item');
+            posts.forEach(post => {
+            post.addEventListener('click', () => {
+            //Get original image URL
+            const imgUrl = post.firstElementChild.src.split("?")[0];
+           //Open image in new tab
+            window.open(imgUrl, '_blank');
+           });
+           });
+           </script> {% endcomment %}
+          
+
+</main>
+
+
+</body>
+
+</html>
+<script src="https://kit.fontawesome.com/50a20c604d.js" crossorigin="anonymous"></script>
         </div>
         <!-- End of gallery -->
 
@@ -448,19 +579,4 @@
       </div>
       <!-- End of container -->
 
-      <script>
-                const posts = document.querySelectorAll('.gallery-item');
-
-        posts.forEach(post => {
-        	post.addEventListener('click', () => {
-        		Get original image URL
-        		const imgUrl = post.firstElementChild.src.split("?")[0];
-        		Open image in new tab
-        		window.open(imgUrl, '_blank');
-        	});
-        });
-      </script>
-    </main>
-  </body>
-</html>
-<script src="https://kit.fontawesome.com/50a20c604d.js" crossorigin="anonymous"></script>
+     

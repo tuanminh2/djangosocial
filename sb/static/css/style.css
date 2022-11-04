@@ -9977,3 +9977,16 @@ aside.sidebar.full-style {
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
+.user{
+  display: flex;
+  align-items: center;
+}
+.profile-pic{
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  background: none;
+}
+.profile-pic img{
+  border: none;
+}
