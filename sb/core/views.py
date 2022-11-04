@@ -21,11 +21,12 @@ def index(request):
     userName_following_list = FollowersCount.objects.filter(
         follower=request.user.username)
     for userNamei in userName_following_list:
-        feed_listi = Post.objects.filter(userName=userNamei)
-        avatar_url = feed_listi[0].auth.profile.profileimage.url
-        for item in feed_listi:
-            dto = {'postContent': item, 'postAuthAvatar': avatar_url}
-            feed.append(dto)
+        post_listi = Post.objects.filter(userName=userNamei)
+        if(post_listi):
+            avatar_url = post_listi[0].auth.profile.profileimage.url
+            for item in post_listi:
+                dto = {'postContent': item, 'postAuthAvatar': avatar_url}
+                feed.append(dto)
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
 
@@ -33,7 +34,9 @@ def index(request):
     userFollowing = []
     userFollowing.append(request.user)
     for usernamei in userName_following_list:
-        userFollowing.append(User.objects.get(username=usernamei))
+        if User.objects.filter(username=usernamei).exists():
+            followingUserI = User.objects.get(username=usernamei)
+            userFollowing.append(followingUserI)
     sugList = [x for x in list(allUser) if (x not in list(userFollowing))]
 
     sugProfileList = []
@@ -41,7 +44,7 @@ def index(request):
         sugProfileList.append(sugUser.profile)
 
     # posts = Post.objects.all()
-    print("---------------------")
+
     print(sugProfileList)
     return render(request, "index.html", {'user_profile': user_profile, 'data': feed, 'sugProfieList': sugProfileList})
 
@@ -218,3 +221,9 @@ def search(request):
         return render(request, 'search.html', {'data': profiles})
 
     return render(request, 'search.html')
+
+def profile_demo(request,pk):
+    user_obj = User.objects.filter(username=pk)
+    return render(request,'profile_demo.html',{
+        "user_obj":user_obj
+    })
