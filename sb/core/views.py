@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount
+from .models import Profile, Post, LikePost, FollowersCount, Comment
 from itertools import chain
 
 
@@ -139,18 +139,19 @@ def like_post(request):
     userName = request.user.username
     # use get() for param
     post_id = request.GET.get('post_id')
-    post = Post.objects.get(id=post_id)
+    currentPost = Post.objects.filter(id=post_id).first()
+    print(type(currentPost))
     like_filter = LikePost.objects.filter(
-        post_id=post_id, userName=userName).first()
+        post=currentPost, userName=userName).first()
     if like_filter == None:
-        newLike = LikePost.objects.create(post_id=post_id, userName=userName)
-        post.no_of_likes = post.no_of_likes + 1
-        post.save()
+        newLike = LikePost.objects.create(post=currentPost, userName=userName)
+        currentPost.no_of_likes = currentPost.no_of_likes + 1
+        currentPost.save()
         return redirect('/')
     else:
         like_filter.delete()
-        post.no_of_likes = post.no_of_likes - 1
-        post.save()
+        currentPost.no_of_likes = currentPost.no_of_likes - 1
+        currentPost.save()
         return redirect('/')
 
 
@@ -222,8 +223,25 @@ def search(request):
 
     return render(request, 'search.html')
 
-def profile_demo(request,pk):
-    user_obj = User.objects.filter(username=pk)
-    return render(request,'profile_demo.html',{
-        "user_obj":user_obj
-    })
+
+@login_required(login_url='signin')
+def comment_post(request):
+    userName = request.user.username
+    content = request.GET.get('content')
+    # use get() for param
+    post_id = request.GET.get('post_id')
+    currentPost = Post.objects.filter(id=post_id).first()
+    print(type(currentPost))
+    oldComment = Comment.objects.filter(
+        post=currentPost, content=content, userName=userName).first()
+    if oldComment == None:
+        newLike = Comment.objects.create(
+            post=currentPost, content=content, userName=userName)
+        currentPost.no_of_comments = currentPost.no_of_comments + 1
+        currentPost.save()
+        return redirect('/')
+    else:
+        oldComment.delete()
+        currentPost.no_of_comments = currentPost.no_of_comments - 1
+        currentPost.save()
+        return redirect('/')
