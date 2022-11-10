@@ -239,21 +239,13 @@ def search(request):
 @login_required(login_url='signin')
 def comment_post(request):
     userName = request.user.username
-    content = request.GET.get('content')
+    content = request.POST["content"]
     # use get() for param
-    post_id = request.GET.get('post_id')
+    post_id = request.POST["post_id"]
     currentPost = Post.objects.filter(id=post_id).first()
     print(type(currentPost))
-    oldComment = Comment.objects.filter(
-        post=currentPost, content=content, userName=userName).first()
-    if oldComment == None:
-        newLike = Comment.objects.create(
-            post=currentPost, content=content, userName=userName)
-        currentPost.no_of_comments = currentPost.no_of_comments + 1
-        currentPost.save()
-        return redirect('/')
-    else:
-        oldComment.delete()
-        currentPost.no_of_comments = currentPost.no_of_comments - 1
-        currentPost.save()
-        return redirect('/')
+    newPost = Comment.objects.create(
+        post=currentPost, content=content, userName=userName)
+    currentPost.no_of_comments = currentPost.no_of_comments + 1
+    currentPost.save()
+    return redirect('/')
