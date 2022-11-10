@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Profile, Post, LikePost, FollowersCount, Comment
 from itertools import chain
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 @login_required(login_url='signin')
@@ -25,7 +27,14 @@ def index(request):
         if(post_listi):
             avatar_url = post_listi[0].auth.profile.profileimage.url
             for item in post_listi:
-                dto = {'postContent': item, 'postAuthAvatar': avatar_url}
+                dto = None
+                likedPostUserNames = {u.userName for u in item.likes.all()}
+                if request.user.username in likedPostUserNames:
+                    dto = {'postContent': item,
+                           'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 1}
+                else:
+                    dto = {'postContent': item,
+                           'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 0}
                 feed.append(dto)
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
@@ -134,11 +143,12 @@ def upload(request):
         return redirect('/')
 
 
-@login_required(login_url='signin')
+@csrf_exempt
 def like_post(request):
     userName = request.user.username
     # use get() for param
-    post_id = request.GET.get('post_id')
+    post_id = request.POST['post_id']
+    print("----------------", post_id)
     currentPost = Post.objects.filter(id=post_id).first()
     print(type(currentPost))
     like_filter = LikePost.objects.filter(
@@ -146,13 +156,15 @@ def like_post(request):
     if like_filter == None:
         newLike = LikePost.objects.create(post=currentPost, userName=userName)
         currentPost.no_of_likes = currentPost.no_of_likes + 1
+        likeCount = currentPost.no_of_likes
         currentPost.save()
-        return redirect('/')
+        return JsonResponse(status=200, data={'message': 'like success', 'likeCount': likeCount})
     else:
         like_filter.delete()
         currentPost.no_of_likes = currentPost.no_of_likes - 1
+        likeCount = currentPost.no_of_likes
         currentPost.save()
-        return redirect('/')
+        return JsonResponse(status=200, data={'message': 'unlike success', 'likeCount': likeCount})
 
 
 @login_required(login_url='signin')
@@ -180,7 +192,7 @@ def profile(request, pk):
         'followingCount': followingCount,
 
     }
-    return render(request, "profile.html", context)
+    return render(request, "profile1.html", context)
 
 
 @login_required(login_url='signin')
