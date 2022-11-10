@@ -11,7 +11,7 @@ User = get_user_model()
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     userId = models.IntegerField()
-    userName = models.CharField(max_length=100)
+    userName = models.CharField(max_length=100, default="usernamedefaut")
     bio = models.TextField(blank=True)
     profileimage = models.ImageField(
         upload_to="profile_images", default="defaultimg.jpg")
@@ -69,7 +69,7 @@ class Comment(models.Model):
     content = models.CharField(max_length=500)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, default=None, related_name="comments")
-    userName = models.CharField(max_length=100)
+    userName = models.CharField(max_length=100, default="usernamedefaut")
     updatedAt = models.DateTimeField(auto_now=True)
     createdAt = models.DateTimeField(auto_now=True)
 

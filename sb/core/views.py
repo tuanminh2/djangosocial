@@ -25,11 +25,11 @@ def index(request):
     for userNamei in userName_following_list:
         post_listi = Post.objects.filter(userName=userNamei)
         if(post_listi):
-            avatar_url = post_listi[0].auth.profile.profileimage.url
+            avatar_url = post_listi[0].user.profile.profileimage.url
             for item in post_listi:
                 dto = None
-                likedPostUserNames = {u.userName for u in item.likes.all()}
-                if request.user.username in likedPostUserNames:
+                likedPostUserIds = {li.user.id for li in item.likes.all()}
+                if request.user.id in likedPostUserIds:
                     dto = {'postContent': item,
                            'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 1}
                 else:
@@ -54,7 +54,7 @@ def index(request):
 
     # posts = Post.objects.all()
 
-    print(sugProfileList)
+    print("--------------", len(feed))
     return render(request, "index.html", {'user_profile': user_profile, 'data': feed, 'sugProfieList': sugProfileList})
 
 
@@ -95,8 +95,8 @@ def signup(request):
                 user = User.objects.create_user(
                     username=username, email=email, password=password)
                 # savedUser = user.save()
-                new_profile = Profile.objects.create(
-                    user=user, userId=user.id)
+                new_profile = Profile.objects.create(userName=username,
+                                                     user=user, userId=user.id)
                 new_profile.save()
                 return redirect("/signin")
         else:
@@ -137,7 +137,7 @@ def upload(request):
         caption = request.POST['caption']
 
         newPost = Post.objects.create(userName=userName,
-                                      image=image, caption=caption, auth=request.user)
+                                      image=image, caption=caption, user=request.user)
         return redirect('/')
     else:
         return redirect('/')
@@ -148,13 +148,15 @@ def like_post(request):
     userName = request.user.username
     # use get() for param
     post_id = request.POST['post_id']
-    print("----------------", post_id)
+
     currentPost = Post.objects.filter(id=post_id).first()
-    print(type(currentPost))
+
     like_filter = LikePost.objects.filter(
-        post=currentPost, userName=userName).first()
+        post=currentPost, user=request.user).first()
+
     if like_filter == None:
-        newLike = LikePost.objects.create(post=currentPost, userName=userName)
+        newLike = LikePost.objects.create(
+            post=currentPost, user=request.user)
         currentPost.no_of_likes = currentPost.no_of_likes + 1
         likeCount = currentPost.no_of_likes
         currentPost.save()
