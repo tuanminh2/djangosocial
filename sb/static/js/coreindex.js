@@ -1,22 +1,3 @@
-// href="/like-post?post_id={{item.postContent.id}}"
-$(".likePost").on("click", function () {
-  let that = this;
-  postId = $(this).parent().parent().parent().attr("id");
-  $.ajax({
-    type: "post",
-    url: "/like-post",
-    data: {
-      post_id: postId,
-    },
-    success: function (result) {
-      likeAction(that, result.likeCount);
-    },
-    error: function (err) {
-      console.log(err);
-    },
-  });
-});
-
 const likeAction = function (likeObj, likeCount) {
   svgIcon = $(likeObj).find(".likeSvg");
   isAuthLiked = svgIcon.attr("data-active");

@@ -9,15 +9,26 @@
     <title>Home</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+      integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+      integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+      crossorigin="anonymous"
+    />
     <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
+    <link rel="stylesheet" href="{% static 'css/coreindex.css' %}" />
   </head>
 
   <body>
@@ -370,8 +381,14 @@
               id="{{item.postContent.id}}"
               class="py-3 px-4 space-y-3 post-action"
             >
+              <p>
+                <a href="/profile/{{item.postContent.userName}}"
+                  ><strong>User: {{item.postContent.userName}} </strong>Caption:
+                  {{item.postContent.caption}}
+                </a>
+              </p>
               <div class="flex space-x-4 lg:font-bold">
-                <div class="flex items-center space-x-2">
+                <div class="flex space-x-2">
                   <span class="p-2 rounded-full text-black likePost">
                     {% if item.isLikedByLoggedUser == 1 %}
                     <svg
@@ -412,58 +429,77 @@
 
                     {% endif %}
                   </span>
-                </div>
-
-                <a
-                  href="#"
-                  class="flex items-center space-x-2 flex-1 justify-end"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    aria-hidden="true"
-                    role="img"
-                    width="25"
-                    height="25"
-                    preserveAspectRatio="xMidYMid meet"
-                    viewBox="0 0 16 16"
-                  >
-                    <g fill="currentColor">
-                      <path
-                        d="M8.5 1.5A1.5 1.5 0 0 1 10 0h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h6c-.314.418-.5.937-.5 1.5v6h-2a.5.5 0 0 0-.354.854l2.5 2.5a.5.5 0 0 0 .708 0l2.5-2.5A.5.5 0 0 0 10.5 7.5h-2v-6z"
-                      />
-                    </g>
-                  </svg>
-                </a>
-              </div>
-
-              <p>
-                <a href="/profile/{{item.postContent.userName}}"
-                  ><strong>User: {{item.postContent.userName}} </strong>Caption:
-                  {{item.postContent.caption}}
-                </a>
-              </p>
-
-              <div
-                class="bg-gray-100 bg-gray-100 rounded-full rounded-md relative"
-              >
-                <input
-                  type="text"
-                  placeholder="post a comment"
-                  class="bg-transparent max-h-10 shadow-none"
-                />
-                <div
-                  class="absolute bottom-0 flex h-full items-center right-0 right-3 text-xl space-x-2"
-                >
-                  <button>
-                    <i
-                     
-                      class="fa fa-paper-plane"
+                  <span class="p-2 rounded-full text-black commentPostStart"
+                    ><i
+                      class="fa fa-comment-o"
+                      style="
+                        font-size: 1.4rem;
+                        font-weight: bold;
+                        margin-left: 200px;
+                      "
                       aria-hidden="true"
                     ></i>
-                  </button>
+                  </span>
                 </div>
               </div>
+            </div>
+            <hr />
+            <div class="commentSection">
+              <!-- comment 1 -->
+              <div class="commentSection__list">
+                <!-- avatar -->
+                <img
+                  src="https://source.unsplash.com/collection/happy-people"
+                  alt="avatar"
+                  class="avatarImg"
+                />
+                <!-- comment text -->
+                <div class="commentItem">
+                  <!-- comment menu of author -->
+                  <div class="commentItemHeader">
+                    <!-- icon -->
+                    <div class="dropdown">
+                      <i
+                        role="button"
+                        class="fa fa-ellipsis-h"
+                        type="button"
+                        data-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                      </i>
+
+                      <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#">Edit comment</a>
+                        <a class="dropdown-item" href="#">Delete comment</a>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="commentItem__name">John</p>
+                  <p class="commentItem__content">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  </p>
+                </div>
+              </div>
+              <!-- comment 2 -->
+
+              <!-- create comment -->
+              <form class="commentSection__form">
+                <!-- avatar -->
+                <div>
+                  <img
+                    src="https://source.unsplash.com/collection/happy-people"
+                    alt="avatar"
+                    style="width: 38px; height: 38px; object-fit: cover"
+                  />
+                </div>
+                <!-- input -->
+                <input
+                  type="text"
+                  class="form-control border-0 rounded-pill bg-gray"
+                  placeholder="Write a comment"
+                />
+              </form>
+              <!-- end -->
             </div>
           </div>
 
@@ -530,9 +566,61 @@
     ================================================== -->
     <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+      crossorigin="anonymous"
+    ></script>
     <script src="{% static 'assets/js/uikit.js' %}"></script>
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
     <script src="{% static '/js/coreindex.js' %}"></script>
+    <script>
+      $(".likePost").on("click", function () {
+        let that = this;
+        postId = $(this).parent().parent().parent().attr("id");
+        $.ajax({
+          type: "post",
+          url: "/like-post",
+          data: {
+            postId: postId,
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          },
+          success: function (result) {
+            likeAction(that, result.likeCount);
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      });
+
+      $(".sendComment").on("click", function () {
+        postId = $(this).parent().parent().parent().attr("id");
+        console.log(postId);
+        content = $(this).parent().parent().find(".commentInp").val();
+        console.log(content);
+        $.ajax({
+          type: "post",
+          url: "/comment-post",
+          data: {
+            content: content,
+            postId: postId,
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          },
+          success: function (result) {
+            console.log(result);
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      });
+
+      $(".commentPostStart").on("click", function () {
+        $(".commentSection").toggleClass("show");
+      });
+    </script>
   </body>
 </html>

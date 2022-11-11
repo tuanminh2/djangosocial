@@ -143,13 +143,12 @@ def upload(request):
         return redirect('/')
 
 
-@csrf_exempt
 def like_post(request):
     userName = request.user.username
     # use get() for param
-    post_id = request.POST['post_id']
+    postId = request.POST['postId']
 
-    currentPost = Post.objects.filter(id=post_id).first()
+    currentPost = Post.objects.filter(id=postId).first()
 
     like_filter = LikePost.objects.filter(
         post=currentPost, user=request.user).first()
@@ -238,16 +237,23 @@ def search(request):
     return render(request, 'search.html')
 
 
-@login_required(login_url='signin')
 def comment_post(request):
     userName = request.user.username
     content = request.POST["content"]
     # use get() for param
-    post_id = request.POST["post_id"]
-    currentPost = Post.objects.filter(id=post_id).first()
+    postId = request.POST["postId"]
+    currentPost = Post.objects.filter(id=postId).first()
     print(type(currentPost))
-    newPost = Comment.objects.create(
-        post=currentPost, content=content, userName=userName)
+    newComment = Comment.objects.create(
+        post=currentPost, content=content, userName=userName, user=request.user)
     currentPost.no_of_comments = currentPost.no_of_comments + 1
     currentPost.save()
-    return redirect('/')
+    return JsonResponse(status=200, data={'message': 'comment success'})
+
+
+def getPostComments(request, postId):
+    userName = request.user.username
+    # use get() for param
+    print("------------", postId)
+
+    return JsonResponse(status=200, data={'message': 'comment success'})
