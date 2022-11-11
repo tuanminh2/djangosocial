@@ -6,10 +6,10 @@
   box-sizing: border-box;
 }
 
-.commentSection.show {
+.commentContainer.show {
   display: block;
 }
-.commentSection {
+.commentContainer {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -19,13 +19,13 @@
 
   display: none;
 }
-.commentSection .commentSection__list {
+.commentContainer .commentItem {
   display: flex;
   align-items: center;
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
-.commentSection .commentSection__list img {
+.commentContainer .commentItem img {
   vertical-align: middle;
   margin-right: 0.5rem;
   border-radius: 50%;
@@ -34,17 +34,18 @@
   -o-object-fit: cover;
   object-fit: cover;
 }
-.commentSection .commentSection__list .commentItem {
+.commentContainer .commentItem .commentContent {
   width: 100%;
   padding: 1rem;
   border-radius: 0.25rem;
 }
-.commentSection .commentSection__list .commentItem .commentItemHeader {
+.commentContainer .commentItem .commentContent .commentContentHeader {
+
   box-sizing: border-box;
   display: flex !important;
   justify-content: flex-end !important;
 }
-.commentSection .commentSection__list .commentItem .commentItemHeader i {
+.commentContainer .commentItem .commentContent .commentContentHeader i {
   display: inline-block;
   font-style: normal;
   font-variant: normal;
@@ -53,23 +54,23 @@
   font-weight: 900;
   cursor: pointer;
 }
-.commentSection .commentSection__list .commentItem .commentItem__name {
+.commentContainer .commentItem .commentContent .commentContentName {
   margin: 0;
   font-weight: 700;
 }
-.commentSection .commentSection__list .commentItem .commentItem__content {
+.commentContainer .commentItem .commentContent .commentContentText {
   margin: 0;
   padding: 0.5rem;
   border-radius: 0.25rem;
   background-color: #f0f2f5;
   font-size: 0.8rem;
 }
-.commentSection .commentSection__form {
+.commentContainer .commentContainerForm {
   display: flex !important;
   margin-top: 0.25rem !important;
   margin-bottom: 0.25rem !important;
 }
-.commentSection .commentSection__form img {
+.commentContainer .commentContainerForm img {
   vertical-align: middle;
   margin-right: 0.5rem !important;
   border-radius: 50% !important;
@@ -78,10 +79,21 @@
   -o-object-fit: cover;
   object-fit: cover;
 }
-.commentSection .commentSection__form input {
+.commentContainer .commentContainerForm .commentInput {
+
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.commentContainer .commentContainerForm  span{
+  font-size: 1.6rem;
+}
+.commentContainer .commentContainerForm .commentInput input {
+  
   margin: 0;
   display: block;
-  width: 100%;
+  width: 80%;
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
   font-weight: 400;

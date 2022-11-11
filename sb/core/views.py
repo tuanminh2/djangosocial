@@ -103,7 +103,6 @@ def signup(request):
             messages.info(request, "Password not matching")
             return redirect('signup')
 
-        print(password)
     else:
         return render(request, 'signup.html')
 
@@ -149,7 +148,6 @@ def like_post(request):
     postId = request.POST['postId']
 
     currentPost = Post.objects.filter(id=postId).first()
-
     like_filter = LikePost.objects.filter(
         post=currentPost, user=request.user).first()
 
@@ -251,9 +249,9 @@ def comment_post(request):
     return JsonResponse(status=200, data={'message': 'comment success'})
 
 
-def getPostComments(request, postId):
-    userName = request.user.username
-    # use get() for param
-    print("------------", postId)
+def getPostComments(request, pk):
 
-    return JsonResponse(status=200, data={'message': 'comment success'})
+    # use get() for param
+    print("------------", pk)
+    comments = Comment.objects.filter(post=pk)
+    return JsonResponse(status=200, data={'comments': list(comments.values())}, safe=False)

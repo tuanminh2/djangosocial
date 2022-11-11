@@ -16,7 +16,7 @@ urlpatterns = [
     # api post
     path("comment-post",  views.comment_post, name="comment-post"),
     # api get
-    path("get-post-comments",  views.getPostComments, name="get-post-comments")
+    path("post/<str:pk>/comments",  views.getPostComments, name="post-comments")
 
 
 

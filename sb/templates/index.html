@@ -444,9 +444,9 @@
               </div>
             </div>
             <hr />
-            <div class="commentSection">
+            <div class="commentContainer">
               <!-- comment 1 -->
-              <div class="commentSection__list">
+              <div class="commentItem">
                 <!-- avatar -->
                 <img
                   src="https://source.unsplash.com/collection/happy-people"
@@ -454,9 +454,9 @@
                   class="avatarImg"
                 />
                 <!-- comment text -->
-                <div class="commentItem">
+                <div class="commentContent">
                   <!-- comment menu of author -->
-                  <div class="commentItemHeader">
+                  <div class="commentContentHeader">
                     <!-- icon -->
                     <div class="dropdown">
                       <i
@@ -474,16 +474,15 @@
                       </div>
                     </div>
                   </div>
-                  <p class="commentItem__name">John</p>
-                  <p class="commentItem__content">
+                  <p class="commentContentName">John</p>
+                  <p class="commentContentText">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   </p>
                 </div>
               </div>
-              <!-- comment 2 -->
 
               <!-- create comment -->
-              <form class="commentSection__form">
+              <form class="commentContainerForm">
                 <!-- avatar -->
                 <div>
                   <img
@@ -493,11 +492,19 @@
                   />
                 </div>
                 <!-- input -->
-                <input
-                  type="text"
-                  class="form-control border-0 rounded-pill bg-gray"
-                  placeholder="Write a comment"
-                />
+                <div class="commentInput">
+                  <input
+                    type="text"
+                    class="form-control border-0 rounded-pill bg-gray"
+                    placeholder="Write a comment"
+                  />
+                  <span class="postCommentBtn">
+                    <i
+                      class="fa fa-paper-plane postCommentBtnIcon"
+                      aria-hidden="true"
+                    ></i>
+                  </span>
+                </div>
               </form>
               <!-- end -->
             </div>
@@ -618,9 +625,7 @@
         });
       });
 
-      $(".commentPostStart").on("click", function () {
-        $(".commentSection").toggleClass("show");
-      });
+   
     </script>
   </body>
 </html>
