@@ -25,8 +25,9 @@ class Profile(models.Model):
 
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    userName = models.CharField(max_length=100)
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, default=None, related_name="posts")
+
     image = models.ImageField(upload_to='post_images')
     caption = models.TextField()
     createdAt = models.DateTimeField(default=datetime.now())
@@ -34,7 +35,7 @@ class Post(models.Model):
     no_of_comments = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.user.username
+        return self.profile.userName
 
 # MANY TO ONE > Post
 # MANY TO ONE > User
@@ -43,18 +44,20 @@ class Post(models.Model):
 class LikePost(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, default=None, related_name="likes")
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, default=None, related_name="likes")
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, default=None, related_name="likes")
 
     def __str__(self):
-        return self.user.username
+        return self.profile.userName
 
 # N2N Table store many to many of Profile n2n Profile
 
 
-class FollowersCount(models.Model):
-    follower = models.CharField(max_length=500)
-    userName = models.CharField(max_length=500)
+class Contact(models.Model):
+    follower = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, default=None, related_name="follower")
+    following = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, default=None, related_name="following")
 
     def __str__(self):
         return self.userName
@@ -67,11 +70,11 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, default=None, related_name="comments")
     content = models.CharField(max_length=500)
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, default=None, related_name="comments")
-    userName = models.CharField(max_length=100, default="usernamedefaut")
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, default=None, related_name="comments")
+
     updatedAt = models.DateTimeField(auto_now=True)
     createdAt = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.user.username
+        return self.profile.userName

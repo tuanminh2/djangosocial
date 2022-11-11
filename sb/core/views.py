@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount, Comment
+from .models import Profile, Post, LikePost, Contact, Comment
 from itertools import chain
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -14,69 +14,67 @@ from django.views.decorators.csrf import csrf_exempt
 @login_required(login_url='signin')
 def index(request):
 
-    user_object = User.objects.get(username=request.user.username)
-    user_profile = Profile.objects.get(user=user_object)
+    loggedUser = User.objects.get(username=request.user.username)
+    loggedUserProfile = loggedUser.profile
 
-    userName_following_list = []
     feed = []
 
-    userName_following_list = FollowersCount.objects.filter(
-        follower=request.user.username)
-    for userNamei in userName_following_list:
-        post_listi = Post.objects.filter(userName=userNamei)
-        if(post_listi):
-            avatar_url = post_listi[0].user.profile.profileimage.url
-            for item in post_listi:
+    followingContactList = Contact.objects.filter(
+        follower=loggedUserProfile)
+    for followingContactI in followingContactList:
+        followingProfile = followingContactI.following
+        postListI = followingProfile.posts.all()
+        if (postListI):
+            avatar_url = postListI[0].profile.profileimage.url
+            for item in postListI:
                 dto = None
-                likedPostUserIds = {li.user.id for li in item.likes.all()}
+                likedPostUserIds = {
+                    li.profile.userId for li in item.likes.all()}
                 if request.user.id in likedPostUserIds:
                     dto = {'postContent': item,
+                           'postUserName': item.profile.userName,
                            'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 1}
                 else:
                     dto = {'postContent': item,
+                           'postUserName': item.profile.userName,
                            'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 0}
                 feed.append(dto)
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
 
-    allUser = User.objects.all()
-    userFollowing = []
-    userFollowing.append(request.user)
-    for usernamei in userName_following_list:
-        if User.objects.filter(username=usernamei).exists():
-            followingUserI = User.objects.get(username=usernamei)
-            userFollowing.append(followingUserI)
-    sugList = [x for x in list(allUser) if (x not in list(userFollowing))]
+    allProfile = Profile.objects.all()
+    loggedUserFollowingProfile = set()
+    loggedUserFollowingProfile.add(request.user.profile)
 
-    sugProfileList = []
-    for sugUser in sugList:
-        sugProfileList.append(sugUser.profile)
+    for contactI in followingContactList:
+        loggedUserFollowingProfile.add(contactI.following)
+    sugList = [x for x in list(allProfile) if (
+        x not in loggedUserFollowingProfile)]
 
     # posts = Post.objects.all()
 
-    print("--------------", len(feed))
-    return render(request, "index.html", {'user_profile': user_profile, 'data': feed, 'sugProfieList': sugProfileList})
+    return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfieList': sugList})
 
 
 @login_required
 def settings(request):
-    user_profile = Profile.objects.get(user=request.user)
-    if(request.method == "POST"):
+    userProfile = Profile.objects.get(user=request.user)
+    if (request.method == "POST"):
         image = None
         if request.FILES.get('image') == None:
-            image = user_profile.profileimage
+            image = userProfile.profileimage
         else:
             image = request.FILES.get('image')
         bio = request.POST['bio']
         location = request.POST['location']
 
-        user_profile.profileimage = image
-        user_profile.bio = bio
-        user_profile.location = location
-        user_profile.save()
+        userProfile.profileimage = image
+        userProfile.bio = bio
+        userProfile.location = location
+        userProfile.save()
         return redirect('settings')
 
-    return render(request, 'setting.html', {'user_profile': user_profile})
+    return render(request, 'setting.html', {'userProfile': userProfile})
 
 
 def signup(request):
@@ -88,7 +86,7 @@ def signup(request):
         password = request.POST["password"]
         password2 = request.POST["password2"]
         if password == password2:
-            if User.objects.filter(email=email).exists():
+            if User.objects.get(email=email).exists():
                 messages.info(request, 'Email taken')
                 return redirect('/signup')
             else:
@@ -135,25 +133,25 @@ def upload(request):
         image = request.FILES.get('image_upload')
         caption = request.POST['caption']
 
-        newPost = Post.objects.create(userName=userName,
-                                      image=image, caption=caption, user=request.user)
+        newPost = Post.objects.create(
+            image=image, caption=caption, profile=request.user.profile)
         return redirect('/')
     else:
         return redirect('/')
 
 
 def like_post(request):
-    userName = request.user.username
+    loggedUserProfile = request.user.profile
     # use get() for param
     postId = request.POST['postId']
 
-    currentPost = Post.objects.filter(id=postId).first()
+    currentPost = Post.objects.get(id=postId)
     like_filter = LikePost.objects.filter(
-        post=currentPost, user=request.user).first()
+        post=currentPost, profile=loggedUserProfile).first()
 
     if like_filter == None:
         newLike = LikePost.objects.create(
-            post=currentPost, user=request.user)
+            post=currentPost, profile=loggedUserProfile)
         currentPost.no_of_likes = currentPost.no_of_likes + 1
         likeCount = currentPost.no_of_likes
         currentPost.save()
@@ -168,25 +166,25 @@ def like_post(request):
 
 @login_required(login_url='signin')
 def profile(request, pk):
-    user_object = User.objects.get(username=pk)
-    user_profile = Profile.objects.get(user=user_object)
-    user_posts = Post.objects.filter(userName=pk)
-    user_posts_length = len(user_posts)
 
-    follower = request.user.username
-    if FollowersCount.objects.filter(follower=follower, userName=pk):
-        button_text = 'Unfollow'
+    userObject = User.objects.get(username=pk)
+    userProfile = Profile.objects.get(user=userObject)
+    userPosts = Post.objects.filter(profile=userProfile)
+    userPostsLen = len(userPosts)
+
+    if Contact.objects.filter(follower=request.user.id, following=userObject.id):
+        buttonText = 'Unfollow'
     else:
-        button_text = 'Follow'
+        buttonText = 'Follow'
 
-    followerCount = len(FollowersCount.objects.filter(userName=pk))
-    followingCount = len(FollowersCount.objects.filter(follower=pk))
+    followerCount = len(Contact.objects.filter(follower=userObject.id))
+    followingCount = len(Contact.objects.filter(following=userObject.id))
     context = {
-        'user_object': user_object,
-        'user_profile': user_profile,
-        'user_posts': user_posts,
-        'user_posts_length': user_posts_length,
-        'button_text': button_text,
+        'userObject': userObject,
+        'userProfile': userProfile,
+        'userPosts': userPosts,
+        'userPostsLen': userPostsLen,
+        'buttonText': buttonText,
         'followerCount': followerCount,
         'followingCount': followingCount,
 
@@ -197,28 +195,31 @@ def profile(request, pk):
 @login_required(login_url='signin')
 def follow(request):
     if request.method == "POST":
-        follower = request.POST["follower"]
-        userName = request.POST["userName"]
+        followerUserName = request.POST["follower"]
+        follwingUserName = request.POST["userName"]
 
-        oldFollower = FollowersCount.objects.filter(
-            follower=follower, userName=userName).first()
+        followerProfile = Profile.objects.get(userName=followerUserName)
+        follwingProfile = Profile.objects.get(userName=follwingUserName)
 
-        if(oldFollower):
+        oldFollow = Contact.objects.filter(follower=followerProfile,
+                                           following=follwingProfile).first()
 
-            delete_follower = oldFollower.delete()
-            return redirect("/profile/"+userName)
+        if (oldFollow):
+            deleteFollow = oldFollow.delete()
+            return redirect("/profile/"+follwingUserName)
         else:
 
-            new_follower = FollowersCount.objects.create(
-                follower=follower, userName=userName)
-            return redirect("/profile/"+userName)
+            newFollow = Contact.objects.create(
+                follower=followerProfile, following=follwingProfile)
+
+            return redirect("/profile/"+follwingUserName)
 
     else:
         return redirect("/")
 
 
 def search(request):
-    user_object = User.objects.get(username=request.user.username)
+    userObject = User.objects.get(username=request.user.username)
 
     if request.method == "POST":
         username = request.POST['nameOfUser']
@@ -239,8 +240,8 @@ def comment_post(request):
     userName = request.user.username
     content = request.POST["content"]
     # use get() for param
-    postId = request.POST["postId"]
-    currentPost = Post.objects.filter(id=postId).first()
+    itemd = request.POST["itemd"]
+    currentPost = Post.objects.filter(id=itemd).first()
     print(type(currentPost))
     newComment = Comment.objects.create(
         post=currentPost, content=content, userName=userName, user=request.user)

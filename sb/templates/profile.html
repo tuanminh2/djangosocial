@@ -416,14 +416,14 @@
         <div class="profile">
           <div class="profile-image">
             <img
-              src="{{user_profile.profileimage.url}}"
+              src="{{userProfile.profileimage.url}}"
               alt=""
               style="height:152px;width: 152px;"
             />
           </div>
           
           <div class="profile-user-settings">
-            <h1 class="profile-user-name">{{user_profile.user.username}}</h1>
+            <h1 class="profile-user-name">{{userProfile.user.username}}</h1>
 
             <a href="/settings" class="btn profile-edit-btn">Edit Profile</a>
 
@@ -437,7 +437,7 @@
 
           <div class="profile-stats">
             <ul>
-              <li><span class="profile-stat-count">{{user_posts_length}}</span> posts</li>
+              <li><span class="profile-stat-count">{{userPosts_length}}</span> posts</li>
               <li><span class="profile-stat-count">{{followerCount}}</span> followers</li>
               <li><span class="profile-stat-count">{{followingCount}}</span> following</li>
             </ul>
@@ -445,7 +445,7 @@
 
           <div class="profile-bio">
             <p>
-              <span class="profile-real-name">{{user.username}}</span> {{user_profile.bio}}
+              <span class="profile-real-name">{{user.username}}</span> {{userProfile.bio}}
             </p>
           </div>
         </div>
@@ -456,7 +456,7 @@
     <main>
       <div class="container">
         <div class="gallery">
-          {% for post in user_posts %}
+          {% for post in userPosts %}
           <div class="gallery-item" tabindex="0" onclick="showhinh()" >
             <img
               src="{{post.image.url}}"
@@ -493,9 +493,9 @@
                       <div class="box-head">
                         <img
                           class="box-head_img is-rounded"
-                          src="{{user_profile.profileimage.url}}"
+                          src="{{userProfile.profileimage.url}}"
                         />
-                        <p class="box_name">{{user_profile.user.username}}</p>
+                        <p class="box_name">{{userProfile.user.username}}</p>
                       </div>
                     </div>
                   </div>
