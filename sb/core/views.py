@@ -9,27 +9,48 @@ from .models import Profile, Post, LikePost, Contact, Comment
 from itertools import chain
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import json
+from django.core import serializers
+from sb.decorators import query_debugger
+from django.forms.models import model_to_dict
 
 
+@query_debugger
 @login_required(login_url='signin')
 def index(request):
-
+    print("-----------------QUERY-1--------------")
     loggedUser = User.objects.get(username=request.user.username)
     loggedUserProfile = loggedUser.profile
 
     feed = []
 
+# get contactlist
     followingContactList = Contact.objects.filter(
-        follower=loggedUserProfile)
+        follower=loggedUserProfile).select_related("following")
     for followingContactI in followingContactList:
+        # get profile of contact(1)
         followingProfile = followingContactI.following
+        # get all post of that profile
+
+        # postListI = Post.objects.filter(
+        #     profile=followingProfile).select_related("profile")
+        # is join and not join(where id)
+        # but is the same when profile is GETTED BEFORE IN (1)
         postListI = followingProfile.posts.all()
+
+        avatar_url = followingProfile.profileimage.url
         if (postListI):
-            avatar_url = postListI[0].profile.profileimage.url
+
             for item in postListI:
                 dto = None
+                print("-----------------QUERY-Them1--------------")
                 likedPostUserIds = {
                     li.profile.userId for li in item.likes.all()}
+                # likedPostUserIds = {
+                #     li.profile.userId for li in LikePost.objects.filter(
+                #         post=item).select_related("profile")}
+                print("-----------------QUERY-Them end1--------------")
+
                 if request.user.id in likedPostUserIds:
                     dto = {'postContent': item,
                            'postUserName': item.profile.userName,
@@ -86,7 +107,7 @@ def signup(request):
         password = request.POST["password"]
         password2 = request.POST["password2"]
         if password == password2:
-            if User.objects.get(email=email).exists():
+            if User.objects.filter(email=email).exists():
                 messages.info(request, 'Email taken')
                 return redirect('/signup')
             else:
@@ -237,22 +258,29 @@ def search(request):
 
 
 def comment_post(request):
-    userName = request.user.username
+
     content = request.POST["content"]
     # use get() for param
-    itemd = request.POST["itemd"]
-    currentPost = Post.objects.filter(id=itemd).first()
-    print(type(currentPost))
+    postId = request.POST["postId"]
+    currentPost = Post.objects.get(id=postId)
     newComment = Comment.objects.create(
-        post=currentPost, content=content, userName=userName, user=request.user)
+        post=currentPost, content=content, profile=request.user.profile)
     currentPost.no_of_comments = currentPost.no_of_comments + 1
     currentPost.save()
     return JsonResponse(status=200, data={'message': 'comment success'})
 
 
+@query_debugger
 def getPostComments(request, pk):
 
     # use get() for param
-    print("------------", pk)
-    comments = Comment.objects.filter(post=pk)
-    return JsonResponse(status=200, data={'comments': list(comments.values())}, safe=False)
+
+    commentsWithProfile = Comment.objects.filter(
+        post=pk).select_related("profile")
+    data = []
+    for item in commentsWithProfile:
+        data.append({"item": model_to_dict(item), "authUserName": item.profile.userName,
+                    "authImg": item.profile.profileimage.url})
+    # return JsonResponse(status=200, data={'comments': list(comments.values())}, safe=False)
+
+    return JsonResponse(data, safe=False)

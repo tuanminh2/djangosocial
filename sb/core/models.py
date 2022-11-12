@@ -55,9 +55,9 @@ class LikePost(models.Model):
 
 class Contact(models.Model):
     follower = models.ForeignKey(
-        Profile, on_delete=models.CASCADE, default=None, related_name="follower")
+        Profile, on_delete=models.CASCADE, default=None, related_name="followers")
     following = models.ForeignKey(
-        Profile, on_delete=models.CASCADE, default=None, related_name="following")
+        Profile, on_delete=models.CASCADE, default=None, related_name="followings")
 
     def __str__(self):
         return self.userName

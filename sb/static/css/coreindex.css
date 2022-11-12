@@ -6,10 +6,10 @@
   box-sizing: border-box;
 }
 
-.commentContainer.show {
+.commentSection.show {
   display: block;
 }
-.commentContainer {
+.commentSection {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -19,13 +19,13 @@
 
   display: none;
 }
-.commentContainer .commentItem {
+.commentSection .commentContainer .commentItem {
   display: flex;
   align-items: center;
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
-.commentContainer .commentItem img {
+.commentSection .commentContainer .commentItem img {
   vertical-align: middle;
   margin-right: 0.5rem;
   border-radius: 50%;
@@ -34,18 +34,26 @@
   -o-object-fit: cover;
   object-fit: cover;
 }
-.commentContainer .commentItem .commentContent {
+.commentSection .commentContainer .commentItem .commentContent {
   width: 100%;
   padding: 1rem;
   border-radius: 0.25rem;
 }
-.commentContainer .commentItem .commentContent .commentContentHeader {
-
+.commentSection
+  .commentContainer
+  .commentItem
+  .commentContent
+  .commentContentHeader {
   box-sizing: border-box;
   display: flex !important;
   justify-content: flex-end !important;
 }
-.commentContainer .commentItem .commentContent .commentContentHeader i {
+.commentSection
+  .commentContainer
+  .commentItem
+  .commentContent
+  .commentContentHeader
+  i {
   display: inline-block;
   font-style: normal;
   font-variant: normal;
@@ -54,23 +62,31 @@
   font-weight: 900;
   cursor: pointer;
 }
-.commentContainer .commentItem .commentContent .commentContentName {
+.commentSection
+  .commentContainer
+  .commentItem
+  .commentContent
+  .commentContentName {
   margin: 0;
   font-weight: 700;
 }
-.commentContainer .commentItem .commentContent .commentContentText {
+.commentSection
+  .commentContainer
+  .commentItem
+  .commentContent
+  .commentContentText {
   margin: 0;
   padding: 0.5rem;
   border-radius: 0.25rem;
   background-color: #f0f2f5;
   font-size: 0.8rem;
 }
-.commentContainer .commentContainerForm {
+.commentSection .commentSectionForm {
   display: flex !important;
   margin-top: 0.25rem !important;
   margin-bottom: 0.25rem !important;
 }
-.commentContainer .commentContainerForm img {
+.commentSection .commentSectionForm img {
   vertical-align: middle;
   margin-right: 0.5rem !important;
   border-radius: 50% !important;
@@ -79,18 +95,16 @@
   -o-object-fit: cover;
   object-fit: cover;
 }
-.commentContainer .commentContainerForm .commentInput {
-
+.commentSection .commentSectionForm .commentInput {
   width: 100%;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
 }
-.commentContainer .commentContainerForm  span{
+.commentSection .commentSectionForm span {
   font-size: 1.6rem;
 }
-.commentContainer .commentContainerForm .commentInput input {
-  
+.commentSection .commentSectionForm .commentInput input {
   margin: 0;
   display: block;
   width: 80%;

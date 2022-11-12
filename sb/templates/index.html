@@ -309,7 +309,8 @@
                   </div>
                 </a>
                 <span class="block capitalize font-semibold">
-                  {{item.postContent.userName}}
+                  <!-- {{item.postContent.profile.userName}} -->
+                  {{item.postUserName}}
                 </span>
               </div>
               <div>
@@ -429,7 +430,7 @@
 
                     {% endif %}
                   </span>
-                  <span class="p-2 rounded-full text-black commentPostStart"
+                  <span class="p-2 rounded-full text-black commentShowBtn"
                     ><i
                       class="fa fa-comment-o"
                       style="
@@ -444,45 +445,13 @@
               </div>
             </div>
             <hr />
-            <div class="commentContainer">
-              <!-- comment 1 -->
-              <div class="commentItem">
-                <!-- avatar -->
-                <img
-                  src="https://source.unsplash.com/collection/happy-people"
-                  alt="avatar"
-                  class="avatarImg"
-                />
-                <!-- comment text -->
-                <div class="commentContent">
-                  <!-- comment menu of author -->
-                  <div class="commentContentHeader">
-                    <!-- icon -->
-                    <div class="dropdown">
-                      <i
-                        role="button"
-                        class="fa fa-ellipsis-h"
-                        type="button"
-                        data-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                      </i>
-
-                      <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#">Edit comment</a>
-                        <a class="dropdown-item" href="#">Delete comment</a>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="commentContentName">John</p>
-                  <p class="commentContentText">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  </p>
-                </div>
+            <div class="commentSection">
+              <div class="commentContainer">
+                <!-- comment 1 -->
               </div>
 
               <!-- create comment -->
-              <form class="commentContainerForm">
+              <form class="commentSectionForm">
                 <!-- avatar -->
                 <div>
                   <img
@@ -498,7 +467,7 @@
                     class="form-control border-0 rounded-pill bg-gray"
                     placeholder="Write a comment"
                   />
-                  <span class="postCommentBtn">
+                  <span class="createCommentBtn">
                     <i
                       class="fa fa-paper-plane postCommentBtnIcon"
                       aria-hidden="true"
@@ -603,11 +572,17 @@
         });
       });
 
-      $(".sendComment").on("click", function () {
-        postId = $(this).parent().parent().parent().attr("id");
-        console.log(postId);
-        content = $(this).parent().parent().find(".commentInp").val();
-        console.log(content);
+      $(".createCommentBtn").on("click", function () {
+        postId = $(this)
+          .parent()
+          .parent()
+          .parent()
+          .parent()
+          .find(".py-3.px-4.space-y-3.post-action")
+          .attr("id");
+
+        content = $(this).prev().val();
+
         $.ajax({
           type: "post",
           url: "/comment-post",

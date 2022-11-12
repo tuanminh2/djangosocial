@@ -23,15 +23,16 @@ const likeAction = function (likeObj, likeCount) {
 };
 
 //COMMENTS-------------
-$(".commentPostStart").on("click", function () {
-  commentContainer = $(this)
+$(".commentShowBtn").on("click", function () {
+  commentSection = $(this)
     .parent()
     .parent()
     .parent()
     .parent()
 
-    .find(".commentContainer");
+    .find(".commentSection");
 
+  console.log("---------", commentSection);
   postId = $(this).parent().parent().parent().attr("id");
   //call comment
 
@@ -42,9 +43,9 @@ $(".commentPostStart").on("click", function () {
       csrfmiddlewaretoken: "{{ csrf_token }}",
     },
     success: function (result) {
-      console.log(result.comments);
+      console.log(result);
 
-      showPostComments(commentContainer, result.comments);
+      showComments(commentSection, result.comments);
     },
     error: function (err) {
       console.log(err);
@@ -52,14 +53,51 @@ $(".commentPostStart").on("click", function () {
   });
 });
 
-const showPostComments = function (commentObj, data) {
+{
+}
+const showComments = function (commentObj, data) {
+  commentContainer = $(commentObj).find(".commentContainer");
+  commentList = [];
   data.map((item) => {
+    commentList.push(`<div class="commentItem">
+
+    <img
+      src=${item.profile.profileimage.url}
+      alt="avatar"
+      class="avatarImg"
+    />
+  
+    <div class="commentContent">
+     
+      <div class="commentContentHeader">
+      
+        <div class="dropdown">
+          <i
+            role="button"
+            class="fa fa-ellipsis-h"
+            type="button"
+            data-toggle="dropdown"
+            aria-expanded="false"
+          >
+          </i>
     
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="#">Edit comment</a>
+            <a class="dropdown-item" href="#">Delete comment</a>
+          </div>
+        </div>
+      </div>
+      <p class="commentContentName">${item.profile.userName}</p>
+      <p class="commentContentText">
+      ${item.content}
+      </p>
+    </div>
+    </div> `);
   });
+  commentContainer.html(commentList);
   commentObj.toggleClass("show");
 };
 
 //Post comment
-$(document).on("click", ".postCommentBtn", function () {});
 
 //COMMENT===============
