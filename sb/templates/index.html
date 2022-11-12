@@ -38,7 +38,7 @@
           {% csrf_token %}
           <div class="left-side">
             <!-- Logo -->
-            <div id="logo" class="uk-hidden@s">
+            <div id="logo" class="-hidden@s">
               <a href="/">
                 <b><h1 style="text-transform: uppercase">Social</h1></b>
               </a>
@@ -391,35 +391,20 @@
               <div class="flex space-x-4 lg:font-bold">
                 <div class="flex space-x-2">
                   <span class="p-2 rounded-full text-black likePost">
-                    {% if item.isLikedByLoggedUser == 1 %}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
-                      fill="blue"
+                      fill="{{item.likeButtonColor}}"
                       width="25"
                       height="25"
                       class="likeSvg"
-                      data-active="1"
                     >
                       <path
                         d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"
                       />
                     </svg>
-                    {% else %}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="grey"
-                      width="25"
-                      height="25"
-                      class="likeSvg"
-                      data-active="0"
-                    >
-                      <path
-                        d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"
-                      />
-                    </svg>
-                    {% endif %} {% if item.postContent.no_of_likes != 0 %}
+
+                    {% if item.postContent.no_of_likes != 0 %}
                     <p class="likeCountP">
                       Like by
                       <span class="likeCountSpan"
@@ -445,7 +430,7 @@
               </div>
             </div>
             <hr />
-            <div class="commentSection">
+            <div class="commentSection" data-show="0">
               <div class="commentContainer">
                 <!-- comment 1 -->
               </div>
@@ -573,7 +558,6 @@
       });
 
       $(".createCommentBtn").on("click", function () {
-        console.log("_______________asifjssdnf");
         postId = $(this)
           .parent()
           .parent()
@@ -597,9 +581,60 @@
             csrfmiddlewaretoken: "{{ csrf_token }}",
           },
           success: function (addedCommentRs) {
-            console.log("--------{}{}{}--", addedCommentRs);
             addToComments(commentContainer, addedCommentRs);
-            console.log("SUCCCESS>>>>>>>>>>>>");
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      });
+
+      //update comment
+      $(document).on("click", ".updateCommentBtn", function () {
+        commentItem = $(this).parent().parent().parent();
+        commentId = commentItem.attr("id");
+
+        commentContentText = $(this)
+          .parent()
+          .parent()
+          .find(".commentContentText");
+
+        content = commentContentText.val();
+        commentOpt = $(this).parent();
+
+        $.ajax({
+          type: "post",
+          url: `/comment-post/${commentId}`,
+          data: {
+            content: content,
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          },
+          success: function (rs) {
+            console.log(rs);
+            commentContentText.attr("disabled", true);
+            commentOpt.remove();
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      });
+      // delete
+      $(document).on("click", ".deleteCommentBtn", function () {
+        commentItem = $(this).parent().parent().parent().parent().parent();
+        commentId = commentItem.attr("id");
+
+        console.log("..............", commentItem);
+
+        $.ajax({
+          type: "post",
+          url: `/comment-post/${commentId}`,
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          },
+          success: function (rs) {
+            console.log(rs);
+            commentItem.remove();
           },
           error: function (err) {
             console.log(err);

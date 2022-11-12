@@ -52,11 +52,11 @@ def index(request):
                 if request.user.id in likedPostUserIds:
                     dto = {'postContent': item,
                            'postUserName': postUserName,
-                           'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 1}
+                           'postAuthAvatar': avatar_url, 'likeButtonColor': "blue"}
                 else:
                     dto = {'postContent': item,
                            'postUserName': postUserName,
-                           'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 0}
+                           'postAuthAvatar': avatar_url, 'likeButtonColor': "grey"}
                 feed.append(dto)
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
@@ -206,7 +206,7 @@ def profile(request, pk):
         'followingCount': followingCount,
 
     }
-    return render(request, "profile1.html", context)
+    return render(request, "profile.html", context)
 
 
 @login_required(login_url='signin')
@@ -253,20 +253,36 @@ def search(request):
     return render(request, 'search.html')
 
 
-def comment_post(request):
+def commentPost(request):
 
     content = request.POST["content"]
     # use get() for param
     postId = request.POST["postId"]
+    print("---------------sfksafmskdmf", postId)
     currentPost = Post.objects.get(id=postId)
     loggedUserProfile = request.user.profile
     newComment = Comment.objects.create(
         post=currentPost, content=content, profile=loggedUserProfile)
     currentPost.no_of_comments = currentPost.no_of_comments + 1
     currentPost.save()
-    print("----------------------")
-    print(model_to_dict(newComment))
     return JsonResponse(status=200, data={"item": model_to_dict(newComment), "authUserName": loggedUserProfile.userName, "authImg": loggedUserProfile.profileimage.url})
+
+
+def commentPostRUD(request, pk):
+    if request.method == "POST":
+        # update and delete
+        content = request.POST.get('content')
+        oldComment = Comment.objects.get(id=pk)
+        if content:
+            # update
+            oldComment.content = content
+            oldComment.save()
+            return JsonResponse(status=200, data={"message": "update success"})
+        else:
+            # delete
+            oldComment.delete()
+            return JsonResponse(status=200, data={"message": "delete success"})
+    return redirect("/")
 
 
 @query_debugger
@@ -277,9 +293,14 @@ def getPostComments(request, pk):
     commentsWithProfile = Comment.objects.filter(
         post=pk).select_related("profile")
     data = []
+    loggedUserProfile = request.user.profile
     for item in commentsWithProfile:
-        data.append({"item": model_to_dict(item), "authUserName": item.profile.userName,
-                    "authImg": item.profile.profileimage.url})
+        if item.profile == loggedUserProfile:
+            data.append({"item": model_to_dict(item), "authUserName": item.profile.userName,
+                         "authImg": item.profile.profileimage.url, "optionHTML": "<div class='dropdown'> <i role='button' class ='fa fa-ellipsis-h' type='button' data-toggle='dropdown' aria-expanded='false'> </i> <div class ='dropdown-menu'><span class='dropdown-item editCommentBtn'> Edit comment </span> <span class='dropdown-item deleteCommentBtn'> Delete comment <span></div> </div>"})
+        else:
+            data.append({"item": model_to_dict(item), "authUserName": item.profile.userName,
+                         "authImg": item.profile.profileimage.url, "optionHTML": ""})
     # return JsonResponse(status=200, data={'comments': list(comments.values())}, safe=False)
 
     return JsonResponse(data, safe=False)
