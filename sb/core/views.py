@@ -27,50 +27,46 @@ def index(request):
 # get contactlist
     followingContactList = Contact.objects.filter(
         follower=loggedUserProfile).select_related("following")
+
+    followingProfileSet = set()
     for followingContactI in followingContactList:
-        # get profile of contact(1)
+
         followingProfile = followingContactI.following
-        # get all post of that profile
-
-        # postListI = Post.objects.filter(
-        #     profile=followingProfile).select_related("profile")
-        # is join and not join(where id)
-        # but is the same when profile is GETTED BEFORE IN (1)
+        #
+        followingProfileSet.add(followingProfile)
+        #
         postListI = followingProfile.posts.all()
-
         avatar_url = followingProfile.profileimage.url
+        postUserName = followingProfile.userName
         if (postListI):
 
             for item in postListI:
                 dto = None
-                print("-----------------QUERY-Them1--------------")
-                likedPostUserIds = {
-                    li.profile.userId for li in item.likes.all()}
+
                 # likedPostUserIds = {
-                #     li.profile.userId for li in LikePost.objects.filter(
-                #         post=item).select_related("profile")}
-                print("-----------------QUERY-Them end1--------------")
+                #     li.profile.userId for li in item.likes.all()}
+                likedPostUserIds = {
+                    li.profile.userId for li in LikePost.objects.filter(
+                        post=item).select_related("profile")}
 
                 if request.user.id in likedPostUserIds:
                     dto = {'postContent': item,
-                           'postUserName': item.profile.userName,
+                           'postUserName': postUserName,
                            'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 1}
                 else:
                     dto = {'postContent': item,
-                           'postUserName': item.profile.userName,
+                           'postUserName': postUserName,
                            'postAuthAvatar': avatar_url, 'isLikedByLoggedUser': 0}
                 feed.append(dto)
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
 
     allProfile = Profile.objects.all()
-    loggedUserFollowingProfile = set()
-    loggedUserFollowingProfile.add(request.user.profile)
 
-    for contactI in followingContactList:
-        loggedUserFollowingProfile.add(contactI.following)
+    followingProfileSet.add(request.user.profile)
+
     sugList = [x for x in list(allProfile) if (
-        x not in loggedUserFollowingProfile)]
+        x not in followingProfileSet)]
 
     # posts = Post.objects.all()
 
@@ -185,23 +181,23 @@ def like_post(request):
         return JsonResponse(status=200, data={'message': 'unlike success', 'likeCount': likeCount})
 
 
+@query_debugger
 @login_required(login_url='signin')
 def profile(request, pk):
-
-    userObject = User.objects.get(username=pk)
-    userProfile = Profile.objects.get(user=userObject)
-    userPosts = Post.objects.filter(profile=userProfile)
+    loggedUserProfile = request.user.profile
+    userProfile = Profile.objects.prefetch_related("posts").get(userName=pk)
+    userPosts = userProfile.posts.all()
     userPostsLen = len(userPosts)
 
-    if Contact.objects.filter(follower=request.user.id, following=userObject.id):
+    if Contact.objects.filter(follower=loggedUserProfile, following=userProfile).first():
         buttonText = 'Unfollow'
     else:
         buttonText = 'Follow'
 
-    followerCount = len(Contact.objects.filter(follower=userObject.id))
-    followingCount = len(Contact.objects.filter(following=userObject.id))
+    followerCount = len(Contact.objects.filter(follower=userProfile))
+    followingCount = len(Contact.objects.filter(following=userProfile))
     context = {
-        'userObject': userObject,
+
         'userProfile': userProfile,
         'userPosts': userPosts,
         'userPostsLen': userPostsLen,
