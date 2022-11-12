@@ -259,11 +259,14 @@ def comment_post(request):
     # use get() for param
     postId = request.POST["postId"]
     currentPost = Post.objects.get(id=postId)
+    loggedUserProfile = request.user.profile
     newComment = Comment.objects.create(
-        post=currentPost, content=content, profile=request.user.profile)
+        post=currentPost, content=content, profile=loggedUserProfile)
     currentPost.no_of_comments = currentPost.no_of_comments + 1
     currentPost.save()
-    return JsonResponse(status=200, data={'message': 'comment success'})
+    print("----------------------")
+    print(model_to_dict(newComment))
+    return JsonResponse(status=200, data={"item": model_to_dict(newComment), "authUserName": loggedUserProfile.userName, "authImg": loggedUserProfile.profileimage.url})
 
 
 @query_debugger

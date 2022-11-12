@@ -39,13 +39,11 @@ $(".commentShowBtn").on("click", function () {
   $.ajax({
     type: "get",
     url: `/post/${postId}/comments`,
-    data: {
-      csrfmiddlewaretoken: "{{ csrf_token }}",
-    },
+
     success: function (result) {
       console.log(result);
-
-      showComments(commentSection, result.comments);
+      refreshComments(commentSection, result);
+      commentSection.toggleClass("show");
     },
     error: function (err) {
       console.log(err);
@@ -53,16 +51,14 @@ $(".commentShowBtn").on("click", function () {
   });
 });
 
-{
-}
-const showComments = function (commentObj, data) {
+const refreshComments = function (commentObj, data) {
   commentContainer = $(commentObj).find(".commentContainer");
   commentList = [];
-  data.map((item) => {
+  data.map((el) => {
     commentList.push(`<div class="commentItem">
 
     <img
-      src=${item.profile.profileimage.url}
+      src=${el.authImg}
       alt="avatar"
       class="avatarImg"
     />
@@ -87,17 +83,50 @@ const showComments = function (commentObj, data) {
           </div>
         </div>
       </div>
-      <p class="commentContentName">${item.profile.userName}</p>
+      <p class="commentContentName">${el.authUserName}</p>
       <p class="commentContentText">
-      ${item.content}
+      ${el.item.content}
       </p>
     </div>
     </div> `);
   });
   commentContainer.html(commentList);
-  commentObj.toggleClass("show");
 };
 
-//Post comment
+const addToComments = function (commentContainer, data) {
+  console.log("_______________OKOKOK", commentContainer);
+  commentContainer.append(`<div class="commentItem">
 
-//COMMENT===============
+    <img
+      src=${data.authImg}
+      alt="avatar"
+      class="avatarImg"
+    />
+  
+    <div class="commentContent">
+     
+      <div class="commentContentHeader">
+      
+        <div class="dropdown">
+          <i
+            role="button"
+            class="fa fa-ellipsis-h"
+            type="button"
+            data-toggle="dropdown"
+            aria-expanded="false"
+          >
+          </i>
+    
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="#">Edit comment</a>
+            <a class="dropdown-item" href="#">Delete comment</a>
+          </div>
+        </div>
+      </div>
+      <p class="commentContentName">${data.authUserName}</p>
+      <p class="commentContentText">
+      ${data.item.content}
+      </p>
+    </div>
+    </div> `);
+};

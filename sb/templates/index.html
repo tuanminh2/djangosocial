@@ -573,6 +573,7 @@
       });
 
       $(".createCommentBtn").on("click", function () {
+        console.log("_______________asifjssdnf");
         postId = $(this)
           .parent()
           .parent()
@@ -582,7 +583,11 @@
           .attr("id");
 
         content = $(this).prev().val();
-
+        commentContainer = $(this)
+          .parent()
+          .parent()
+          .parent()
+          .find(".commentContainer");
         $.ajax({
           type: "post",
           url: "/comment-post",
@@ -591,8 +596,10 @@
             postId: postId,
             csrfmiddlewaretoken: "{{ csrf_token }}",
           },
-          success: function (result) {
-            console.log(result);
+          success: function (addedCommentRs) {
+            console.log("--------{}{}{}--", addedCommentRs);
+            addToComments(commentContainer, addedCommentRs);
+            console.log("SUCCCESS>>>>>>>>>>>>");
           },
           error: function (err) {
             console.log(err);
