@@ -72,7 +72,7 @@ const refreshComments = function (commentObj, data) {
     commentData += el.optionHTML;
     commentData += `</div>
       <p class="commentContentName">${el.authUserName}</p>
-      <input disabled class="commentContentText" value=${el.item.content} />
+      <input disabled class="commentContentText" value="${el.item.content}" />
       
      
     </div>
@@ -113,7 +113,7 @@ const addToComments = function (commentContainer, data) {
         </div>
       </div>
       <p class="commentContentName">${data.authUserName}</p>
-      <input disabled class="commentContentText" value=${data.item.content} />
+      <input disabled class="commentContentText" value="${data.item.content}" />
      
      
     </div>
