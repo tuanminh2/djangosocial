@@ -19,7 +19,7 @@ class Profile(models.Model):
         upload_to="profile_images", default="defaultimg.jpg")
     location = models.CharField(max_length=100,  blank=True)
 
-    # index for searching feed
+    # index for searching speed
     indexes = [
         models.Index(fields=['userName', ]),
     ]
@@ -36,7 +36,7 @@ class Profile(models.Model):
         super().save(*args, **kwargs)
 
 
-# MANY TO ONE > authUser
+# MANY TO ONE > Profile
 
 
 class Post(models.Model):
@@ -57,7 +57,7 @@ class Post(models.Model):
         return self.profile.userName
 
 # MANY TO ONE > Post
-# MANY TO ONE > User
+# MANY TO ONE > Profile
 
 
 class LikePost(models.Model):
@@ -82,7 +82,7 @@ class Contact(models.Model):
         return self.follower.userName+" to "+self.following.userName
 
 # MANY TO ONE > Post
-# MANY TO ONE > User
+# MANY TO ONE > Profile
 
 
 class Comment(models.Model):
@@ -97,3 +97,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.profile.userName
+
+    class Meta:
+        ordering = ["-createdAt"]

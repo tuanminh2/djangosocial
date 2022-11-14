@@ -51,6 +51,7 @@ def index(request):
                    'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
         feed.append(dto)
     # Get my follwing's posts
+
     for followingContactI in followingContactList:
 
         followingProfile = followingContactI.following
@@ -80,6 +81,7 @@ def index(request):
                     dto = {'postContent': item,
                            'postUserName': postUserName,
                            'postAuthAvatar': avatar_url, 'likeButtonColor': "grey"}
+
                 feed.append(dto)
 
     allProfile = Profile.objects.all()
@@ -167,16 +169,19 @@ def logout(request):
 
 @login_required(login_url='signin')
 def upload(request):
-    if request.method == 'POST':
-        userName = request.user.username
-        image = request.FILES.get('image_upload')
-        caption = request.POST['caption']
+    try:
+        if request.method == 'POST':
+            userName = request.user.username
+            image = request.FILES.get('image_upload')
+            caption = request.POST['caption']
 
-        newPost = Post.objects.create(
-            image=image, caption=caption, profile=request.user.profile)
-        return redirect('/')
-    else:
-        return redirect('/')
+            newPost = Post.objects.create(
+                image=image, caption=caption, profile=request.user.profile)
+            return redirect('/')
+        else:
+            return redirect('/')
+    except Exception as e:
+        return redirect("/p500")
 
 
 def like_post(request):
@@ -205,56 +210,64 @@ def like_post(request):
 @query_debugger
 @login_required(login_url='signin')
 def profile(request, pk):
-    loggedUserProfile = request.user.profile
-    # Good : use join with prefetch_related instead to reduce number of query after that
-    userProfile = Profile.objects.prefetch_related("posts").get(userName=pk)
-    userPosts = userProfile.posts.all()
-    userPostsLen = len(userPosts)
 
-    if Contact.objects.filter(follower=loggedUserProfile, following=userProfile).first():
-        buttonText = 'Unfollow'
-    else:
-        buttonText = 'Follow'
+    try:
+        loggedUserProfile = request.user.profile
+        # Good : use join with prefetch_related instead to reduce number of query after that
+        userProfile = Profile.objects.prefetch_related(
+            "posts").get(userName=pk)
+        userPosts = userProfile.posts.all()
+        userPostsLen = len(userPosts)
 
-    followerCount = len(Contact.objects.filter(following=userProfile))
-    followingCount = len(Contact.objects.filter(follower=userProfile))
-    context = {
+        if Contact.objects.filter(follower=loggedUserProfile, following=userProfile).first():
+            buttonText = 'Unfollow'
+        else:
+            buttonText = 'Follow'
 
-        'userProfile': userProfile,
-        'userPosts': userPosts,
-        'userPostsLen': userPostsLen,
-        'buttonText': buttonText,
-        'followerCount': followerCount,
-        'followingCount': followingCount,
+        followerCount = len(Contact.objects.filter(following=userProfile))
+        followingCount = len(Contact.objects.filter(follower=userProfile))
+        context = {
 
-    }
-    return render(request, "profile.html", context)
+            'userProfile': userProfile,
+            'userPosts': userPosts,
+            'userPostsLen': userPostsLen,
+            'buttonText': buttonText,
+            'followerCount': followerCount,
+            'followingCount': followingCount,
+
+        }
+        return render(request, "profile.html", context)
+    except Exception as e:
+        return redirect("/p404")
 
 
 @login_required(login_url='signin')
 def follow(request):
-    if request.method == "POST":
-        followerUserName = request.POST["follower"]
-        follwingUserName = request.POST["userName"]
+    try:
+        if request.method == "POST":
+            followerUserName = request.POST["follower"]
+            follwingUserName = request.POST["userName"]
 
-        followerProfile = Profile.objects.get(userName=followerUserName)
-        follwingProfile = Profile.objects.get(userName=follwingUserName)
+            followerProfile = Profile.objects.get(userName=followerUserName)
+            follwingProfile = Profile.objects.get(userName=follwingUserName)
 
-        oldFollow = Contact.objects.filter(follower=followerProfile,
-                                           following=follwingProfile).first()
+            oldFollow = Contact.objects.filter(follower=followerProfile,
+                                               following=follwingProfile).first()
 
-        if (oldFollow):
-            deleteFollow = oldFollow.delete()
-            return redirect("/profile/"+follwingUserName)
+            if (oldFollow):
+                deleteFollow = oldFollow.delete()
+                return redirect("/profile/"+follwingUserName)
+            else:
+
+                newFollow = Contact.objects.create(
+                    follower=followerProfile, following=follwingProfile)
+
+                return redirect("/profile/"+follwingUserName)
+
         else:
-
-            newFollow = Contact.objects.create(
-                follower=followerProfile, following=follwingProfile)
-
-            return redirect("/profile/"+follwingUserName)
-
-    else:
-        return redirect("/")
+            return redirect("/")
+    except Exception as e:
+        return redirect("/p500")
 
 
 def search(request):
@@ -343,3 +356,15 @@ def ajaxFollow(request, userNameToFollow):
     newFollow = Contact.objects.create(
         follower=loggedUserProfile, following=otherProfile)
     return JsonResponse(status=200, data={'message': 'follow success'})
+
+    # error page:
+
+
+def p500(request):
+    # bad request
+    return render(request, 'p500.html')
+
+
+def p404(request):
+    # page not found
+    return render(request, 'p404.html')

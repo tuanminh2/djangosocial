@@ -19,7 +19,14 @@ urlpatterns = [
     path("post/<str:pk>/comments",  views.getPostComments, name="post-comments"),
 
     path("follow/<str:userNameToFollow>",
-         views.ajaxFollow, name="ajax-follow")
+         views.ajaxFollow, name="ajax-follow"),
+
+    # 404 page
+    # page not found
+    path("p404",  views.p404, name="p404"),
+    # 500
+    # server err
+    path("p500",  views.p500, name="p500"),
 
 
 
