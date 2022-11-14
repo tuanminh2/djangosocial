@@ -20,6 +20,12 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+    def save(self, *args, **kwargs):
+        userName = self.user.username
+        userId = self.user.id
+        super().save(*args, **kwargs)
+
+
 # MANY TO ONE > authUser
 
 
