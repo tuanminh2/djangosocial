@@ -45,15 +45,28 @@ def index(request):
     # Good : use join with select_related instead to reduce number of query
     followingContactList = Contact.objects.filter(
         follower=loggedUserProfile).select_related("following")
+
+    # FOR SUGGESTION
+    allProfile = Profile.objects.all()
+
     # use Set to improve speed when check contain
     followingProfileSet = set()
+    followingProfileSet.add(request.user.profile)
+    for item in followingContactList:
+        followingProfileSet.add(item.following)
+
+    # use Set instead List for check exist to improve speed
+    sugList = [x for x in list(allProfile) if (
+        x not in followingProfileSet)]
+    # FOR SUGGESTION
 
     # Get my posts
     myPostList = loggedUserProfile.posts.all()
     myAvatarUrl = loggedUserProfile.profileimage.url
-    item = 0
+    cnt = 0
     for item in myPostList:
-        if item == 5 
+        if cnt == 5:
+            return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
         dto = None
         likedPostUserIds = {
             li.profile.userId for li in LikePost.objects.filter(
@@ -69,19 +82,20 @@ def index(request):
                    'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
 
         feed.append(dto)
+        cnt = cnt+1
     # Get my follwing's posts
 
     for followingContactI in followingContactList:
 
         followingProfile = followingContactI.following
-        # use in (1)
-        followingProfileSet.add(followingProfile)
-        #
+
         postListI = followingProfile.posts.all()
         avatar_url = followingProfile.profileimage.url
         postUserName = followingProfile.userName
         if (postListI):
             for item in postListI:
+                if cnt == 5:
+                    return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
                 dto = None
                 # Bad
                 # likedPostUserIds = {
@@ -102,13 +116,7 @@ def index(request):
                            'postAuthAvatar': avatar_url, 'likeButtonColor': "grey"}
 
                 feed.append(dto)
-
-    allProfile = Profile.objects.all()
-    followingProfileSet.add(request.user.profile)
-    # (1)
-    # use Set instead List for check exist to improve speed
-    sugList = [x for x in list(allProfile) if (
-        x not in followingProfileSet)]
+                cnt = cnt+1
 
     return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
 
