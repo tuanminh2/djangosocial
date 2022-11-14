@@ -11,6 +11,7 @@ User = get_user_model()
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     userId = models.IntegerField()
+    # Consistency trade-off with user table for high traffic of read side:
     userName = models.CharField(
         max_length=100, default="usernamedefaut", unique=True)
     bio = models.TextField(blank=True)

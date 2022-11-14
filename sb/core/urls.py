@@ -16,8 +16,12 @@ urlpatterns = [
     # api comment
     path("comment-post",  views.commentPost, name="comment-post"),
     path("comment-post/<str:pk>",  views.commentPostRUD, name="comment-post"),
-    # api comment
-    path("post/<str:pk>/comments",  views.getPostComments, name="post-comments")
+    path("post/<str:pk>/comments",  views.getPostComments, name="post-comments"),
+
+    path("follow/<str:userNameToFollow>",
+         views.ajaxFollow, name="ajax-follow")
+
+
 
 
 

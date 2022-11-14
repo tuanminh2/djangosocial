@@ -474,13 +474,13 @@
               class="bg-gray-50 border-b border-gray-100 flex items-baseline justify-between py-4 px-6"
             >
               <h2 class="font-semibold text-lg">Users You Can Follow</h2>
-              <a href="#"> Refresh</a>
+              <!-- <a href="#"> Refresh</a> -->
             </div>
 
             <div
               class="divide-gray-300 divide-gray-50 divide-opacity-50 divide-y px-4"
             >
-              {% for item in sugProfieList %}
+              {% for item in sugProfileList %}
 
               <div class="flex items-center justify-between py-3">
                 <div class="flex flex-1 items-center space-x-4">
@@ -491,30 +491,17 @@
                     />
                   </a>
                   <div class="flex flex-col">
-                    <span class="block capitalize font-semibold">
+                    <span class="block capitalize font-semibold userNameSpan">
                       {{item.user.username}}
                     </span>
-                    <span class="block capitalize text-sm"> 10 </span>
                   </div>
                 </div>
-                <form action="/follow" method="post">
-                  <input
-                    type="hidden"
-                    name="follower"
-                    value="{{user.username}}"
-                  />
-                  <input
-                    type="hidden"
-                    name="userName"
-                    value=" {{item.user.username}}"
-                  />
-                  <button
-                    type="submit"
-                    class="border border-gray-200 font-semibold px-4 py-1 rounded-full hover:bg-pink-600 hover:text-white hover:border-pink-600"
-                  >
-                    {% csrf_token %} Follow
-                  </button>
-                </form>
+
+                <button
+                  class="ajaxFollowBtn border border-gray-200 font-semibold px-4 py-1 rounded-full hover:bg-pink-600 hover:text-white hover:border-pink-600"
+                >
+                  Follow
+                </button>
               </div>
               {% endfor%}
             </div>
@@ -635,6 +622,27 @@
           success: function (rs) {
             console.log(rs);
             commentItem.remove();
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      });
+
+      $(".ajaxFollowBtn").on("click", function () {
+        friendUserName = $(this).prev().find(".userNameSpan").text().trim();
+        console.log("------------", friendUserName);
+        thatBtn = $(this);
+
+        $.ajax({
+          type: "post",
+          url: `follow/${friendUserName}`,
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+          },
+          success: function (rs) {
+            alert("Follow success");
+            thatBtn.parent().remove();
           },
           error: function (err) {
             console.log(err);

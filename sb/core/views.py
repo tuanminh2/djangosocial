@@ -49,7 +49,7 @@ def index(request):
                    'postUserName': loggedUserProfile.userName,
                    'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
         feed.append(dto)
-    # Get my follwing posts
+    # Get my follwing's posts
     for followingContactI in followingContactList:
 
         followingProfile = followingContactI.following
@@ -88,13 +88,13 @@ def index(request):
     sugList = [x for x in list(allProfile) if (
         x not in followingProfileSet)]
 
-    return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfieList': sugList})
+    return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
 
 
 @login_required
 def settings(request):
 
-    # Use get() for get single one
+    # Use get() for get exactly single one
     userProfile = Profile.objects.get(user=request.user)
     if (request.method == "POST"):
         image = None
@@ -215,8 +215,8 @@ def profile(request, pk):
     else:
         buttonText = 'Follow'
 
-    followerCount = len(Contact.objects.filter(follower=userProfile))
-    followingCount = len(Contact.objects.filter(following=userProfile))
+    followerCount = len(Contact.objects.filter(following=userProfile))
+    followingCount = len(Contact.objects.filter(follower=userProfile))
     context = {
 
         'userProfile': userProfile,
@@ -330,15 +330,15 @@ def ajaxFollow(request, userNameToFollow):
 
     loggedUserProfile = request.user.profile
     # must exist should use get()
-    targetProfile = Profile.objects.get(userName=userNameToFollow)
+    otherProfile = Profile.objects.get(userName=userNameToFollow)
 
     # no matter exist or not exist, can use filter(because fitler dont throw exception)
     oldFollow = Contact.objects.filter(follower=loggedUserProfile,
-                                       following=targetProfile).first()
+                                       following=otherProfile).first()
 
     if oldFollow:
         return JsonResponse(status=400, data={'message': 'Follow existed'})
 
     newFollow = Contact.objects.create(
-        follower=loggedUserProfile, following=targetProfile)
+        follower=loggedUserProfile, following=otherProfile)
     return JsonResponse(status=200, data={'message': 'follow success'})
