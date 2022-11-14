@@ -21,8 +21,9 @@ class Profile(models.Model):
         return self.user.username
 
     def save(self, *args, **kwargs):
-        userName = self.user.username
-        userId = self.user.id
+        self.userName = self.user.username
+        self.userId = self.user.id
+
         super().save(*args, **kwargs)
 
 

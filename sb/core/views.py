@@ -61,6 +61,7 @@ def index(request):
 @login_required
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
+    # cannot change username
     if(request.method == "POST"):
         image = None
         if request.FILES.get('image') == None:
@@ -84,7 +85,7 @@ def signup(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-        print(username)
+
         password = request.POST["password"]
         password2 = request.POST["password2"]
         if password == password2:
@@ -95,9 +96,9 @@ def signup(request):
                 user = User.objects.create_user(
                     username=username, email=email, password=password)
                 # savedUser = user.save()
-                new_profile = Profile.objects.create(userName=username,
-                                                     user=user, userId=user.id)
-                new_profile.save()
+                # new_profile = Profile.objects.create(userId=user.id, userName=username,
+                #                                      user=user)
+
                 return redirect("/signin")
         else:
             messages.info(request, "Password not matching")
