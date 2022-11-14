@@ -25,6 +25,7 @@ def index(request):
     feed = []
 
     # get contactlist
+    # select_related store data in query cache
     # Good : use join with select_related instead to reduce number of query
     followingContactList = Contact.objects.filter(
         follower=loggedUserProfile).select_related("following")

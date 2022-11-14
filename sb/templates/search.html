@@ -240,7 +240,7 @@
 
           <a href="#">
             <img
-              src="{{userProfile.profileimage.url}}"
+              src="{{user.profile.profileimage.url}}"
               class="header-avatar"
               alt=""
             />
@@ -258,7 +258,7 @@
           </div>
           {% if user.is_authenticated %}
           <div style="color: white;margin-left: 10px">
-            <p>Welcome, {{ user.get_username }}</p>
+            <p>Welcome, {{ user.username }}</p>
             {% else %}
             <a href="/signin">Signin</a>
             <a href="/signup">SignUP</a>
