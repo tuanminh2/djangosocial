@@ -33,7 +33,7 @@
               ></span
             >
             <span style="color: white; font-size: 27px"
-              ><b>{{userPosts_length}} Post</b></span
+              ><b>{{userPostsLen}} Post</b></span
             >
             <span style="color: white; font-size: 27px"
               ><b>{{followerCount}} followers</b></span
@@ -47,7 +47,7 @@
               value="{{userProfile.userName}}"
               name="userName"
             />
-            {% if user_object.username == user.username %}
+            {% if userProfile.userName == user.username %}
             <button><a href="/settings">Setting</a></button>
             {% else %}
             <button style="background-color: #ffc0cb; border: #ffc0cb">

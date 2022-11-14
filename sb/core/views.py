@@ -18,7 +18,7 @@ from django.forms.models import model_to_dict
 @query_debugger
 @login_required(login_url='signin')
 def index(request):
-    print("-----------------QUERY-1--------------")
+
     loggedUser = User.objects.get(username=request.user.username)
     loggedUserProfile = loggedUser.profile
 
@@ -29,6 +29,26 @@ def index(request):
         follower=loggedUserProfile).select_related("following")
 
     followingProfileSet = set()
+
+    # Get my post
+    myPostList = loggedUserProfile.posts.all()
+    myAvatarUrl = loggedUserProfile.profileimage.url
+    for item in myPostList:
+        dto = None
+        likedPostUserIds = {
+            li.profile.userId for li in LikePost.objects.filter(
+                post=item).select_related("profile")}
+
+        if request.user.id in likedPostUserIds:
+            dto = {'postContent': item,
+                   'postUserName': loggedUserProfile.userName,
+                   'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "blue"}
+        else:
+            dto = {'postContent': item,
+                   'postUserName': loggedUserProfile.userName,
+                   'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
+        feed.append(dto)
+    # Get my follwing posts
     for followingContactI in followingContactList:
 
         followingProfile = followingContactI.following
@@ -39,7 +59,6 @@ def index(request):
         avatar_url = followingProfile.profileimage.url
         postUserName = followingProfile.userName
         if (postListI):
-
             for item in postListI:
                 dto = None
 
@@ -58,17 +77,14 @@ def index(request):
                            'postUserName': postUserName,
                            'postAuthAvatar': avatar_url, 'likeButtonColor': "grey"}
                 feed.append(dto)
+
     # each item in array to a parameter in chain method
     # feed_list = list(chain(*feed))
 
     allProfile = Profile.objects.all()
-
     followingProfileSet.add(request.user.profile)
-
     sugList = [x for x in list(allProfile) if (
         x not in followingProfileSet)]
-
-    # posts = Post.objects.all()
 
     return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfieList': sugList})
 

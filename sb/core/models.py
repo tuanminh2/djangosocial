@@ -67,7 +67,7 @@ class Contact(models.Model):
         Profile, on_delete=models.CASCADE, default=None, related_name="followings")
 
     def __str__(self):
-        return self.userName
+        return self.follower.userName+" to "+self.following.userName
 
 # MANY TO ONE > Post
 # MANY TO ONE > User
