@@ -15,6 +15,22 @@ from sb.decorators import query_debugger
 from django.forms.models import model_to_dict
 
 
+@csrf_exempt
+def getMorePost(request):
+    if (request.method == "POST"):
+        userName = request.POST["loggedUserName"]
+        loggedUser = User.objects.get(username=userName)
+        loggedUserProfile = loggedUser.profile
+
+        sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select core_profile.id from core_contact as ct inner join core_profile on ct.follower_id = core_profile.id) LIMIT 1 OFFSET 1"
+        top100newedPost = Post.objects.raw(sql)
+        print(len(top100newedPost))
+        for item in top100newedPost:
+            print(model_to_dict(item))
+
+    return JsonResponse({"abc": "success"})
+
+
 @query_debugger
 @login_required(login_url='signin')
 def index(request):
@@ -35,7 +51,9 @@ def index(request):
     # Get my posts
     myPostList = loggedUserProfile.posts.all()
     myAvatarUrl = loggedUserProfile.profileimage.url
+    item = 0
     for item in myPostList:
+        if item == 5 
         dto = None
         likedPostUserIds = {
             li.profile.userId for li in LikePost.objects.filter(
@@ -49,6 +67,7 @@ def index(request):
             dto = {'postContent': item,
                    'postUserName': loggedUserProfile.userName,
                    'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
+
         feed.append(dto)
     # Get my follwing's posts
 
@@ -323,6 +342,7 @@ def commentPostRUD(request, pk):
 @query_debugger
 def getPostComments(request, pk):
 
+    # also can filter pk with parent instace in model
     commentsWithProfile = Comment.objects.filter(
         post=pk).select_related("profile")
     data = []

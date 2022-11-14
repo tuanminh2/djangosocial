@@ -27,6 +27,7 @@ urlpatterns = [
     # 500
     # server err
     path("p500",  views.p500, name="p500"),
+    path("gmore",  views.getMorePost, name="gmore"),
 
 
 
