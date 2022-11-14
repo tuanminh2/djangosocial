@@ -21,7 +21,7 @@ const likeAction = function (likeObj, likeCount) {
 };
 
 //COMMENTS-------------
-$(".commentShowBtn").on("click", function () {
+$(document).on("click", ".commentShowBtn", function () {
   commentSection = $(this)
     .parent()
     .parent()
@@ -138,6 +138,3 @@ $(document).on("click", ".cancelUpdateCommentBtn", function () {
   commentContentText.attr("disabled", true);
   commentOpt.remove();
 });
-
-
-

@@ -24,11 +24,14 @@ def getMorePost(request, page):
         loggedUser = request.user
         loggedUserProfile = loggedUser.profile
         fid = str(loggedUserProfile.id)
-        limit = 5
-        offset = (page-1) * limit
+        initLimit = 2
+        limit = (page * initLimit)+initLimit
+
         sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = "+str(
             fid)+") "
-        sql = sql + "LIMIT "+str(limit) + " OFFSET "+str(offset)
+        sql = sql + " ORDER BY pst.createdAt DESC "
+        sql = sql + "LIMIT "+str(limit)
+        print(sql)
         next5post = Post.objects.raw(sql)
         print(len(next5post))
         for postItem in next5post:
@@ -92,29 +95,29 @@ def index(request):
         x not in followingProfileSet)]
     # FOR SUGGESTION
 
-    # Get my posts
-    myPostList = loggedUserProfile.posts.all()
-    myAvatarUrl = loggedUserProfile.profileimage.url
+    # # Get my posts
+    # myPostList = loggedUserProfile.posts.all()
+    # myAvatarUrl = loggedUserProfile.profileimage.url
     cnt = 0
-    for item in myPostList:
-        if cnt == 5:
-            return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
-        dto = None
-        likedPostUserIds = {
-            li.profile.userId for li in LikePost.objects.filter(
-                post=item).select_related("profile")}
+    # for item in myPostList:
+    #     if cnt == 5:
+    #         return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
+    #     dto = None
+    #     likedPostUserIds = {
+    #         li.profile.userId for li in LikePost.objects.filter(
+    #             post=item).select_related("profile")}
 
-        if request.user.id in likedPostUserIds:
-            dto = {'postContent': item,
-                   'postUserName': loggedUserProfile.userName,
-                   'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "blue"}
-        else:
-            dto = {'postContent': item,
-                   'postUserName': loggedUserProfile.userName,
-                   'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
+    #     if request.user.id in likedPostUserIds:
+    #         dto = {'postContent': item,
+    #                'postUserName': loggedUserProfile.userName,
+    #                'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "blue"}
+    #     else:
+    #         dto = {'postContent': item,
+    #                'postUserName': loggedUserProfile.userName,
+    #                'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
 
-        feed.append(dto)
-        cnt = cnt+1
+    #     feed.append(dto)
+    #     cnt = cnt+1
     # Get my follwing's posts
 
     for followingContactI in followingContactList:
@@ -126,7 +129,7 @@ def index(request):
         postUserName = followingProfile.userName
         if (postListI):
             for item in postListI:
-                if cnt == 5:
+                if cnt == 2:
                     return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
                 dto = None
                 # Bad
@@ -149,7 +152,7 @@ def index(request):
 
                 feed.append(dto)
                 cnt = cnt+1
-
+    print("LEN posts ", cnt)
     return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
 
 
