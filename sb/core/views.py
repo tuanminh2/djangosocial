@@ -18,15 +18,16 @@ from django.forms.models import model_to_dict
 @csrf_exempt
 def getMorePost(request, page):
     if (request.method == "POST"):
-        # userName = request.POST["userName"]
+
         rs = []
 
-        loggedUser = User.objects.get(username="ad")
+        loggedUser = request.user
         loggedUserProfile = loggedUser.profile
         fid = str(loggedUserProfile.id)
         limit = 5
         offset = (page-1) * limit
-        sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = 1) "
+        sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = "+str(
+            fid)+") "
         sql = sql + "LIMIT "+str(limit) + " OFFSET "+str(offset)
         next5post = Post.objects.raw(sql)
         print(len(next5post))
@@ -36,14 +37,25 @@ def getMorePost(request, page):
                     post=postItem).select_related("profile")}
             dto = None
             if request.user.id in likedPostUserIds:
-                dto = {"postContent": postItem.caption,
-                       "postImg": postItem.profile.profileimage.url,
+
+                dto = {"postId": postItem.id,
+                       "postContent": postItem.caption,
+                       "postImg": postItem.image.url,
                        "postUserName": postItem.profile.userName,
+                       "postCreatedAt": postItem.createdAt,
+                       "postLikeCount": postItem.no_of_likes,
+                       "loggedUserAvt": loggedUserProfile.profileimage.url,
+                       "loggedUserName": loggedUserProfile.userName,
                        "postAuthAvatar": postItem.profile.profileimage.url, "likeButtonColor": "blue"}
             else:
-                dto = {"postContent": postItem.caption,
-                       "postImg": postItem.profile.profileimage.url,
+                dto = {"postId": postItem.id,
+                       "postContent": postItem.caption,
+                       "postImg": postItem.image.url,
                        "postUserName": postItem.profile.userName,
+                       "postCreatedAt": postItem.createdAt,
+                       "postLikeCount": postItem.no_of_likes,
+                       "loggedUserAvt": loggedUserProfile.profileimage.url,
+                       "loggedUserName": loggedUserProfile.userName,
                        "postAuthAvatar": postItem.profile.profileimage.url, "likeButtonColor": "grey"}
 
             rs.append(dto)
