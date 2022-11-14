@@ -27,19 +27,26 @@
         <form action="/follow" method="post">
           {% csrf_token %}
           <div class="add-btn">
-            <span style="color: white; font-size: 27px; margin-right: 520px"
+            <span
+              style="
+                color: orange;
+                font-size: 27px;
+                margin-right: 360px;
+                border-radius: 20%;
+               
+              "
               ><b
-                ><u><a href="/">Home</a></u></b
+                ><u><a href="/">Back to Home</a></u></b
               ></span
             >
             <span style="color: white; font-size: 27px"
               ><b>{{userPostsLen}} Post</b></span
             >
             <span style="color: white; font-size: 27px"
-              ><b> {{followerCount}}  follower </b></span
+              ><b> {{followerCount}} follower </b></span
             >
             <span style="color: white; font-size: 27px"
-              ><b>  {{followingCount}} following </b></span
+              ><b> {{followingCount}} following </b></span
             >
             <input type="hidden" value="{{user.username}}" name="follower" />
             <input
@@ -96,22 +103,7 @@
                     </h5>
                     <!--<span>Group Admin</span>-->
                   </li>
-                  <!--<li>
-										<a class="" href="javascript:void(0)" title="" data-ripple="">Go live!</a>
-										<a class="" href="javascript:void(0)" title="" data-ripple="">Music</a>
-										<a class="" href="emporium/index-3.html" title="" data-ripple="">Emporium</a>
-										<a class="" href="fitness/index.html" title="" data-ripple="">Health Inspection</a>
-										<a class="" href="settings/account-setting.html" title="" data-ripple="">Settings</a>
-										<a class="" href="javascript:void(0)" title="" data-ripple="">Upload</a>
-										<a class="" href="time-line.html" title="" data-ripple="">time line</a>
-										<a class="" href="timeline-photos.html" title="" data-ripple="">Photos</a>
-										<a class="" href="timeline-videos.html" title="" data-ripple="">Videos</a>
-										<a class="" href="timeline-friends.html" title="" data-ripple="">Friends</a>
-										<a class="" href="timeline-groups.html" title="" data-ripple="">Groups</a>
-										<a class="" href="about.html" title="" data-ripple="">about</a>
-										<a class="" href="#" title="" data-ripple="">more</a>
 
-									</li>-->
                 </ul>
               </div>
             </div>
