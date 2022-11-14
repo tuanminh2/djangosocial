@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="{% static 'css/coreindex.css' %}" />
   </head>
 
-  <body>
+  <body style="padding-bottom:300px">
     <header style="background-color: #1550f3">
       <div class="header_inner">
         <form method="post" action="/search">
@@ -529,6 +529,10 @@
       </div>
     </div>
 
+    <div class="container">
+      <button class="btn bg-primary" style="color:white" id ="loadMoreBtn">LOAD MORE</button>
+    </div>
+
     <!-- Scripts
     ================================================== -->
     <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
@@ -668,6 +672,29 @@
           },
         });
       });
+
+
+
+var curPostPage= 1;
+$("#loadMoreBtn").on("click", function(){
+
+  $.ajax({
+    type: "post",
+    url: `follow/${friendUserName}`,
+    data: {
+      csrfmiddlewaretoken: "{{ csrf_token }}",
+    },
+    success: function (rs) {
+      alert("Follow success");
+      thatBtn.parent().remove();
+    },
+    error: function (err) {
+      console.log(err);
+    },
+  });
+})
+
+
     </script>
   </body>
 </html>

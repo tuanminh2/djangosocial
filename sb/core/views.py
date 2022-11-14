@@ -16,19 +16,39 @@ from django.forms.models import model_to_dict
 
 
 @csrf_exempt
-def getMorePost(request):
+def getMorePost(request, page):
     if (request.method == "POST"):
-        userName = request.POST["loggedUserName"]
-        loggedUser = User.objects.get(username=userName)
+        # userName = request.POST["userName"]
+        rs = []
+
+        loggedUser = User.objects.get(username="ad")
         loggedUserProfile = loggedUser.profile
+        fid = str(loggedUserProfile.id)
+        limit = 5
+        offset = (page-1) * limit
+        sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = 1) "
+        sql = sql + "LIMIT "+str(limit) + " OFFSET "+str(offset)
+        next5post = Post.objects.raw(sql)
+        print(len(next5post))
+        for postItem in next5post:
+            likedPostUserIds = {
+                li.profile.userId for li in LikePost.objects.filter(
+                    post=postItem).select_related("profile")}
+            dto = None
+            if request.user.id in likedPostUserIds:
+                dto = {"postContent": postItem.caption,
+                       "postImg": postItem.profile.profileimage.url,
+                       "postUserName": postItem.profile.userName,
+                       "postAuthAvatar": postItem.profile.profileimage.url, "likeButtonColor": "blue"}
+            else:
+                dto = {"postContent": postItem.caption,
+                       "postImg": postItem.profile.profileimage.url,
+                       "postUserName": postItem.profile.userName,
+                       "postAuthAvatar": postItem.profile.profileimage.url, "likeButtonColor": "grey"}
 
-        sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select core_profile.id from core_contact as ct inner join core_profile on ct.follower_id = core_profile.id) LIMIT 1 OFFSET 1"
-        top100newedPost = Post.objects.raw(sql)
-        print(len(top100newedPost))
-        for item in top100newedPost:
-            print(model_to_dict(item))
+            rs.append(dto)
 
-    return JsonResponse({"abc": "success"})
+    return JsonResponse(rs, safe=False)
 
 
 @query_debugger
