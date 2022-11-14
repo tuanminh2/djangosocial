@@ -18,19 +18,20 @@ from django.forms.models import model_to_dict
 @query_debugger
 @login_required(login_url='signin')
 def index(request):
-
+    # Use get() for get single one
     loggedUser = User.objects.get(username=request.user.username)
     loggedUserProfile = loggedUser.profile
 
     feed = []
 
-# get contactlist
+    # get contactlist
+    # Good : use join with select_related instead to reduce number of query
     followingContactList = Contact.objects.filter(
         follower=loggedUserProfile).select_related("following")
-
+    # use Set to improve speed when check contain
     followingProfileSet = set()
 
-    # Get my post
+    # Get my posts
     myPostList = loggedUserProfile.posts.all()
     myAvatarUrl = loggedUserProfile.profileimage.url
     for item in myPostList:
@@ -52,7 +53,7 @@ def index(request):
     for followingContactI in followingContactList:
 
         followingProfile = followingContactI.following
-        #
+        # use in (1)
         followingProfileSet.add(followingProfile)
         #
         postListI = followingProfile.posts.all()
@@ -61,9 +62,11 @@ def index(request):
         if (postListI):
             for item in postListI:
                 dto = None
-
+                # Bad
                 # likedPostUserIds = {
                 #     li.profile.userId for li in item.likes.all()}
+
+                # Good : use join with select_related instead to reduce number of query
                 likedPostUserIds = {
                     li.profile.userId for li in LikePost.objects.filter(
                         post=item).select_related("profile")}
@@ -78,11 +81,10 @@ def index(request):
                            'postAuthAvatar': avatar_url, 'likeButtonColor': "grey"}
                 feed.append(dto)
 
-    # each item in array to a parameter in chain method
-    # feed_list = list(chain(*feed))
-
     allProfile = Profile.objects.all()
     followingProfileSet.add(request.user.profile)
+    # (1)
+    # use Set instead List for check exist to improve speed
     sugList = [x for x in list(allProfile) if (
         x not in followingProfileSet)]
 
@@ -91,6 +93,8 @@ def index(request):
 
 @login_required
 def settings(request):
+
+    # Use get() for get single one
     userProfile = Profile.objects.get(user=request.user)
     if (request.method == "POST"):
         image = None
@@ -126,6 +130,7 @@ def signup(request):
                 user = User.objects.create_user(
                     username=username, email=email, password=password)
                 # savedUser = user.save()
+                # use Signal for creating new profile after creating user
                 # new_profile = Profile.objects.create(userId=user.id, userName=username,
                 #                                      user=user)
 
@@ -175,9 +180,8 @@ def upload(request):
 
 def like_post(request):
     loggedUserProfile = request.user.profile
-    # use get() for param
     postId = request.POST['postId']
-
+    # Use get() for get single one
     currentPost = Post.objects.get(id=postId)
     like_filter = LikePost.objects.filter(
         post=currentPost, profile=loggedUserProfile).first()
@@ -201,6 +205,7 @@ def like_post(request):
 @login_required(login_url='signin')
 def profile(request, pk):
     loggedUserProfile = request.user.profile
+    # Good : use join with prefetch_related instead to reduce number of query after that
     userProfile = Profile.objects.prefetch_related("posts").get(userName=pk)
     userPosts = userProfile.posts.all()
     userPostsLen = len(userPosts)
@@ -252,6 +257,7 @@ def follow(request):
 
 
 def search(request):
+    # Use get() for get single one
     userObject = User.objects.get(username=request.user.username)
 
     if request.method == "POST":
@@ -270,11 +276,10 @@ def search(request):
 
 
 def commentPost(request):
-
+    # get body payload
     content = request.POST["content"]
-    # use get() for param
     postId = request.POST["postId"]
-    print("---------------sfksafmskdmf", postId)
+
     currentPost = Post.objects.get(id=postId)
     loggedUserProfile = request.user.profile
     newComment = Comment.objects.create(
@@ -304,14 +309,13 @@ def commentPostRUD(request, pk):
 @query_debugger
 def getPostComments(request, pk):
 
-    # use get() for param
-
     commentsWithProfile = Comment.objects.filter(
         post=pk).select_related("profile")
     data = []
     loggedUserProfile = request.user.profile
     for item in commentsWithProfile:
         if item.profile == loggedUserProfile:
+            # returning HTML help client dont need to use if statement
             data.append({"item": model_to_dict(item), "authUserName": item.profile.userName,
                          "authImg": item.profile.profileimage.url, "optionHTML": "<div class='dropdown'> <i role='button' class ='fa fa-ellipsis-h' type='button' data-toggle='dropdown' aria-expanded='false'> </i> <div class ='dropdown-menu'><span class='dropdown-item editCommentBtn'> Edit comment </span> <span class='dropdown-item deleteCommentBtn'> Delete comment <span></div> </div>"})
         else:
@@ -320,3 +324,21 @@ def getPostComments(request, pk):
     # return JsonResponse(status=200, data={'comments': list(comments.values())}, safe=False)
 
     return JsonResponse(data, safe=False)
+
+
+def ajaxFollow(request, userNameToFollow):
+
+    loggedUserProfile = request.user.profile
+    # must exist should use get()
+    targetProfile = Profile.objects.get(userName=userNameToFollow)
+
+    # no matter exist or not exist, can use filter(because fitler dont throw exception)
+    oldFollow = Contact.objects.filter(follower=loggedUserProfile,
+                                       following=targetProfile).first()
+
+    if oldFollow:
+        return JsonResponse(status=400, data={'message': 'Follow existed'})
+
+    newFollow = Contact.objects.create(
+        follower=loggedUserProfile, following=targetProfile)
+    return JsonResponse(status=200, data={'message': 'follow success'})

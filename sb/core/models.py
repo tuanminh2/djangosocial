@@ -11,16 +11,24 @@ User = get_user_model()
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     userId = models.IntegerField()
-    userName = models.CharField(max_length=100, default="usernamedefaut")
+    userName = models.CharField(
+        max_length=100, default="usernamedefaut", unique=True)
     bio = models.TextField(blank=True)
     profileimage = models.ImageField(
         upload_to="profile_images", default="defaultimg.jpg")
     location = models.CharField(max_length=100,  blank=True)
 
+    # index for searching feed
+    indexes = [
+        models.Index(fields=['userName', ]),
+    ]
+
     def __str__(self):
         return self.user.username
 
+    # overide save method
     def save(self, *args, **kwargs):
+
         self.userName = self.user.username
         self.userId = self.user.id
 
