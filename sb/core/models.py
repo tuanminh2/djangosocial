@@ -50,6 +50,9 @@ class Post(models.Model):
     no_of_likes = models.IntegerField(default=0)
     no_of_comments = models.IntegerField(default=0)
 
+    class Meta:
+        ordering = ["-createdAt"]
+
     def __str__(self):
         return self.profile.userName
 
