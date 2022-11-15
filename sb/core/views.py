@@ -29,7 +29,7 @@ def getMorePost(request, page):
 
         sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = "+str(
             fid)+") "
-        sql = sql + " ORDER BY pst.createdAt DESC "
+        sql = sql + " ORDER BY pst.createdAt ASC "
         sql = sql + "LIMIT "+str(limit)
         print(sql)
         next5post = Post.objects.raw(sql)
@@ -124,7 +124,7 @@ def index(request):
 
         followingProfile = followingContactI.following
 
-        postListI = followingProfile.posts.all()
+        postListI = followingProfile.posts.all().order_by('createdAt')
         avatar_url = followingProfile.profileimage.url
         postUserName = followingProfile.userName
         if (postListI):

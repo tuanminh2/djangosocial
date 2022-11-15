@@ -719,7 +719,7 @@ $("#loadMoreBtn").on("click", function(){
               
                ${item.postUserName}
              </span>
-             <p>${item.postCreatedAt}</p>
+             <p>${new Date(item.postCreatedAt).getTime()}</p>
            </div>
            <div>
              <a href="#">
