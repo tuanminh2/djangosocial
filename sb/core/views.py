@@ -24,17 +24,17 @@ def getMorePost(request, page):
         loggedUser = request.user
         loggedUserProfile = loggedUser.profile
         fid = str(loggedUserProfile.id)
-        initLimit = 2
-        limit = (page * initLimit)+initLimit
+        limit = 2
+        offset = (page-1) * limit
 
         sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = "+str(
             fid)+") "
         sql = sql + " ORDER BY pst.createdAt ASC "
-        sql = sql + "LIMIT "+str(limit)
-        print(sql)
-        next5post = Post.objects.raw(sql)
-        print(len(next5post))
-        for postItem in next5post:
+        sql = sql + "LIMIT "+str(limit) + " OFFSET "+str(offset)
+       
+        next2post = Post.objects.raw(sql)
+        print(len(next2post))
+        for postItem in next2post:
             likedPostUserIds = {
                 li.profile.userId for li in LikePost.objects.filter(
                     post=postItem).select_related("profile")}
@@ -73,11 +73,9 @@ def index(request):
     loggedUser = User.objects.get(username=request.user.username)
     loggedUserProfile = loggedUser.profile
 
-    feed = []
-
     # get contactlist
     # select_related store data in query cache
-    # Good : use join with select_related instead to reduce number of query
+    # Good : use join with select_related instead to reduce number of query after that
     followingContactList = Contact.objects.filter(
         follower=loggedUserProfile).select_related("following")
 
@@ -95,63 +93,39 @@ def index(request):
         x not in followingProfileSet)]
     # FOR SUGGESTION
 
-    # # Get my posts
-    # myPostList = loggedUserProfile.posts.all()
-    # myAvatarUrl = loggedUserProfile.profileimage.url
     cnt = 0
-    # for item in myPostList:
-    #     if cnt == 5:
-    #         return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
-    #     dto = None
-    #     likedPostUserIds = {
-    #         li.profile.userId for li in LikePost.objects.filter(
-    #             post=item).select_related("profile")}
-
-    #     if request.user.id in likedPostUserIds:
-    #         dto = {'postContent': item,
-    #                'postUserName': loggedUserProfile.userName,
-    #                'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "blue"}
-    #     else:
-    #         dto = {'postContent': item,
-    #                'postUserName': loggedUserProfile.userName,
-    #                'postAuthAvatar': myAvatarUrl, 'likeButtonColor': "grey"}
-
-    #     feed.append(dto)
-    #     cnt = cnt+1
     # Get my follwing's posts
+    feed = []
+    top10NewPost = Post.objects.all().select_related("profile")[:10]
+    for posti in top10NewPost:
+        if posti.profile in followingProfileSet:
+            curProfile = posti.profile
+            if cnt >= 2:
+                return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
+            avatarUrl = curProfile.profileimage.url
+            postUserName = curProfile.userName
+            dto = None
+            # Bad
+            # likedPostUserIds = {
+            #     li.profile.userId for li in item.likes.all()}
 
-    for followingContactI in followingContactList:
+            # Good : use join with select_related instead to reduce number of query
+            likedPostUserIds = {
+                li.profile.userId for li in LikePost.objects.filter(
+                    post=posti).select_related("profile")}
 
-        followingProfile = followingContactI.following
+            if request.user.id in likedPostUserIds:
+                dto = {'postContent': posti,
+                       'postUserName': postUserName,
+                       'postAuthAvatar': avatarUrl, 'likeButtonColor': "blue"}
+            else:
+                dto = {'postContent': posti,
+                       'postUserName': postUserName,
+                       'postAuthAvatar': avatarUrl, 'likeButtonColor': "grey"}
 
-        postListI = followingProfile.posts.all().order_by('createdAt')
-        avatar_url = followingProfile.profileimage.url
-        postUserName = followingProfile.userName
-        if (postListI):
-            for item in postListI:
-                if cnt == 2:
-                    return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
-                dto = None
-                # Bad
-                # likedPostUserIds = {
-                #     li.profile.userId for li in item.likes.all()}
+            feed.append(dto)
+            cnt = cnt+1
 
-                # Good : use join with select_related instead to reduce number of query
-                likedPostUserIds = {
-                    li.profile.userId for li in LikePost.objects.filter(
-                        post=item).select_related("profile")}
-
-                if request.user.id in likedPostUserIds:
-                    dto = {'postContent': item,
-                           'postUserName': postUserName,
-                           'postAuthAvatar': avatar_url, 'likeButtonColor': "blue"}
-                else:
-                    dto = {'postContent': item,
-                           'postUserName': postUserName,
-                           'postAuthAvatar': avatar_url, 'likeButtonColor': "grey"}
-
-                feed.append(dto)
-                cnt = cnt+1
     print("LEN posts ", cnt)
     return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
 

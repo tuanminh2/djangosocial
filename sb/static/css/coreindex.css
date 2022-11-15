@@ -122,3 +122,10 @@
   border-radius: 50rem !important;
   background-color: #f0f2f5;
 } /*# sourceMappingURL=style2.css.map */
+
+
+#loadMoreBtn{
+  background-color: white;
+  color: blue;
+  border: 1px solid blue;
+}
