@@ -57,7 +57,7 @@ const refreshComments = function (commentObj, data) {
   commentList = [];
   let parser = new DOMParser();
   data.map((el) => {
-    
+
     commentData = `<div id=${el.item.id} class="commentItem">
 
     <img

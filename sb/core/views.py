@@ -15,7 +15,7 @@ from sb.decorators import query_debugger
 from django.forms.models import model_to_dict
 
 
-@csrf_exempt
+
 def getMorePost(request, page):
     if (request.method == "POST"):
 
@@ -24,17 +24,17 @@ def getMorePost(request, page):
         loggedUser = request.user
         loggedUserProfile = loggedUser.profile
         fid = str(loggedUserProfile.id)
-        limit = 2
+        limit = 3
         offset = (page-1) * limit
 
         sql = "select pst.id, pst.caption from core_post as pst inner join core_profile as pro on pst.profile_id = pro.id where pro.id in (select ct.following_id from core_contact as ct where ct.follower_id = "+str(
             fid)+") "
-        sql = sql + " ORDER BY pst.createdAt ASC "
+        sql = sql + " ORDER BY pst.createdAt DESC "
         sql = sql + "LIMIT "+str(limit) + " OFFSET "+str(offset)
        
-        next2post = Post.objects.raw(sql)
-        print(len(next2post))
-        for postItem in next2post:
+        next3post = Post.objects.raw(sql)
+      
+        for postItem in next3post:
             likedPostUserIds = {
                 li.profile.userId for li in LikePost.objects.filter(
                     post=postItem).select_related("profile")}
@@ -75,7 +75,7 @@ def index(request):
 
     # get contactlist
     # select_related store data in query cache
-    # Good : use join with select_related instead to reduce number of query after that
+    # Good : use join with select_related to reduce number of query after that
     followingContactList = Contact.objects.filter(
         follower=loggedUserProfile).select_related("following")
 
@@ -93,14 +93,15 @@ def index(request):
         x not in followingProfileSet)]
     # FOR SUGGESTION
 
+    followingProfileSet.remove(request.user.profile)
     cnt = 0
     # Get my follwing's posts
     feed = []
-    top10NewPost = Post.objects.all().select_related("profile")[:10]
+    top10NewPost = Post.objects.all().select_related("profile")[:100]
     for posti in top10NewPost:
         if posti.profile in followingProfileSet:
             curProfile = posti.profile
-            if cnt >= 2:
+            if cnt >= 3:
                 return render(request, "index.html", {'userProfile': loggedUserProfile, 'data': feed, 'sugProfileList': sugList})
             avatarUrl = curProfile.profileimage.url
             postUserName = curProfile.userName

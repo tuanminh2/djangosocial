@@ -74,7 +74,7 @@
                   <input type="file" name="image_upload" />
                 </div>
 
-                <textarea class="button soft-warning small" name="caption" placeholder="caption...">
+                <textarea class="soft-warning small" name="caption" placeholder="caption...">
                   </textarea>
 
                 <br />
@@ -238,7 +238,7 @@
                 <!-- {{item.postContent.profile.userName}} -->
                 {{item.postUserName}}
               </span>
-              <p>{{item.postContent.createdAt}}</p>
+              <p class="createdAtp">{{item.postContent.createdAt}}</p>
             </div>
             <div>
               <a href="#">
@@ -388,11 +388,12 @@
   </div>
 
   <div class="container">
-    <button class="btn"  id="loadMoreBtn">LOAD MORE</button>
+    <button class="btn" id="loadMoreBtn">LOAD MORE</button>
   </div>
 
   <!-- Scripts
     ================================================== -->
+
   <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
   <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
 
@@ -535,12 +536,11 @@
     $("#loadMoreBtn").on("click", function () {
 
 
-      // nextPage=curPostPage;
-      // curPostPage+=1;
-      let that = $(this)
 
       curPostPage += 1;
       nextPage = curPostPage;
+      let that = $(this)
+
 
       $.ajax({
         type: "post",
@@ -549,9 +549,12 @@
           csrfmiddlewaretoken: "{{ csrf_token }}",
         },
         success: function (rs) {
+          
+          console.log(rs)
 
           if (rs.length == 0) {
-            that.css('background-color', 'silver !important')
+            that.css('color', 'gray')
+            that.css('border', '1px solid gray')
             that.attr('disabled', true)
             return;
           }
@@ -583,7 +586,7 @@
               
                ${item.postUserName}
              </span>
-             <p>${new Date(item.postCreatedAt).toLocaleString()}</p>
+             <p>${new Date(item.postCreatedAt).toISOString()}</p>
            </div>
            <div>
              <a href="#">
